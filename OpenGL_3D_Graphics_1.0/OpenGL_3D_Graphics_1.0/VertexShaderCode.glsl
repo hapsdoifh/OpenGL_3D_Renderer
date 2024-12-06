@@ -3,9 +3,9 @@
 	
 in layout(location=0) vec3 position; //location that came in
 in layout(location=1) vec3 vertexColor; //location <==> attribute
+in layout(location=2) mat4 fullTransformationMatrix;
 
-
-uniform mat4 fullTransformationMatrix;
+//uniform mat4 fullTransformationMatrix;
 
 out vec3 theColor;
 	

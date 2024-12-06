@@ -2,6 +2,7 @@
 #ifndef GL_WINDOW
 #define GL_WINDOW
 #include <QtOpenGLWidgets/qopenglwidget.h>
+//#include <QtWidgets/qapplication.h>
 
 class GlWindow : public QOpenGLWidget
 {
@@ -10,6 +11,8 @@ public:
 protected:
 	void initializeGL() override;
 	void paintGL() override;
+	void mouseMoveEvent(QMouseEvent* event);
+	void keyPressEvent(QKeyEvent* event);
 
 private:
 	void sendDataToOpenGL();

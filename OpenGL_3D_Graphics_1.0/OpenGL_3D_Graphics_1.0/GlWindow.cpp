@@ -10,6 +10,9 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <Vertex.h>
 #include <ShapeGenerator.h>
+#include <Camera.h>
+#include <Qt3DInput/qmouseevent.h>
+#include <QtGui/qevent.h>
 
 using glm::mat4;
 using glm::vec3;
@@ -18,7 +21,7 @@ const uint MAX_TRI = 100;
 const uint VERT_PER_TRI = 3;
 const uint FLOAT_PER_VERT = 3;
 const uint TRI_BYTE_SIZE = VERT_PER_TRI * 6 * sizeof(GLfloat);
-
+Camera myCamera;
 
 ShapeData myShape = ShapeGenerator::makeCube();
 
@@ -35,7 +38,7 @@ void GlWindow::sendDataToOpenGL() {
 	GLuint myBUFFID;
 	glGenBuffers(1, &myBUFFID); //creates a object-like buffer
 	glBindBuffer(GL_ARRAY_BUFFER, myBUFFID); //binds buffer to array_buffer binding point
-	glBufferData(GL_ARRAY_BUFFER, myShape.vertexBufferSize(), myShape.vertices, GL_STATIC_DRAW);  // Sends buffer data down to gpu
+	glBufferData(GL_ARRAY_BUFFER, myShape.vertexBufferSize(), myShape.vertices, GL_DYNAMIC_DRAW);  // Sends buffer data down to gpu
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 6 /*start of one vert data to another*/, 0);
 	glEnableVertexAttribArray(1);
@@ -46,9 +49,27 @@ void GlWindow::sendDataToOpenGL() {
 	GLuint indexBufferID;
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, myShape.indexBufferSize(), myShape.indices, GL_STATIC_DRAW);
-	
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, myShape.indexBufferSize(), myShape.indices, GL_DYNAMIC_DRAW);
+
 	myShape.cleanup();
+
+	GLuint TransformMatrixBuffID;
+	glGenBuffers(1, &TransformMatrixBuffID);
+	glBindBuffer(GL_ARRAY_BUFFER, TransformMatrixBuffID);
+
+	glBufferData(GL_ARRAY_BUFFER,sizeof(mat4)*2, 0, GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 0));
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 4));
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 8));
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 12));
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
+	glEnableVertexAttribArray(5);
+	glVertexAttribDivisor(2, 1);
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+	glVertexAttribDivisor(5, 1);
 }
 
 bool GlWindow::checkShaderStatus(GLuint ShaderID) {
@@ -155,35 +176,75 @@ void GlWindow::sendTriOpenGL() {
 }
 
 void GlWindow::initializeGL() {
+	setMouseTracking(true);
 	glewInit();
 	glEnable(GL_DEPTH_TEST); 
 	sendDataToOpenGL();
 	installShaders(); 
 }
 
+
+void GlWindow::mouseMoveEvent(QMouseEvent* event) {
+	QPointF temp;
+	temp = event->position();
+	if(event->buttons() == Qt::LeftButton)
+		myCamera.mouseUpdate(glm::vec2(temp.x(), temp.y()));
+	update();
+	//std::cout << "test";
+	//paintGL();
+}
+
+
+void GlWindow::keyPressEvent(QKeyEvent* event) {
+	GLfloat frontBack = 0;
+	GLfloat leftRight = 0;
+	GLfloat upDown = 0;
+	switch (event->key()) {
+	case Qt::Key::Key_W:
+		frontBack = 1.0f;
+		break;
+	case Qt::Key::Key_S:
+		frontBack = -1.0f;
+		break;
+	case Qt::Key::Key_A:
+		leftRight = -1.0f;
+		break;
+	case Qt::Key::Key_D:
+		leftRight = 1.0f;
+		break;
+	case Qt::Key::Key_Space:
+		upDown = 1.0f;
+		break;
+	case Qt::Key::Key_C:
+		upDown = -1.0f;
+		break;
+	}
+	myCamera.keyboardUpdate(frontBack, leftRight, upDown);
+	update();
+}
 void GlWindow::paintGL() {
+
+	mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), ((float)width()) / height(), 0.1f, 100.0f); //project front plane close, far plane way far
+	mat4 modelTranslateMatrix = glm::translate(projectionMatrix, vec3(-1.0f, 0.0f, -3.0f));
+	mat4 fullTranformMatrix = glm::rotate(modelTranslateMatrix, glm::radians(36.0f), vec3(1.0f, 0.0f, 0.0f));
+
+	mat4 fullTransforms[] = {
+		projectionMatrix * myCamera.getWorldToViewMatrix() * glm::translate(mat4(1.0f), vec3(-1.0f, 0.0f, -3.0f)) * glm::rotate(mat4(1.0f), glm::radians(36.0f), vec3(1.0f, 0.0f, 0.0f)),
+		projectionMatrix * myCamera.getWorldToViewMatrix() * glm::translate(mat4(1.0f), vec3(1.0f, 0.0f, -3.75f)) * glm::rotate(mat4(1.0f), glm::radians(126.0f), vec3(0.0f,1.0f, 0.0f))
+	};
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fullTransforms), fullTransforms, GL_DYNAMIC_DRAW);
+	//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(fullTransforms), fullTransforms);
+
 	glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 	glClear(GL_DEPTH_BUFFER);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT); 
+
 	glViewport(0, 0, width(), height());
 	//glm::vec3 domColor(1.0f, 1.0f, 0.0f);
 	//GLint domColorUniLocation = glGetUniformLocation(programID, "domColor");
 	//glUniform3fv(domColorUniLocation, 1, &domColor[0]);
-	GLint fullMtxLoc = glGetUniformLocation(programID, "fullTransformationMatrix");
 
-	mat4 projectionMatrix = glm::perspective(glm::radians(80.0f), ((float)width()) / height(), 0.1f, 10.0f); //project front plane close, far plane way far
-	mat4 modelTranslateMatrix = glm::translate(projectionMatrix, vec3(-1.0f, 0.0f, -3.0f));
-	mat4 fullTranformMatrix = glm::rotate(modelTranslateMatrix, glm::radians(36.0f), vec3(1.0f, 0.0f, 0.0f));
-	
-	glUniformMatrix4fv(fullMtxLoc, 1, GL_FALSE, &fullTranformMatrix[0][0]);
-	glDrawElements(GL_TRIANGLES, myShape.numIndices, GL_UNSIGNED_SHORT, 0);
-	 
-	//cube 2
-	modelTranslateMatrix = glm::translate(projectionMatrix, vec3(1.0f, -0.0f, -3.75f));
-	fullTranformMatrix = glm::rotate(modelTranslateMatrix, glm::radians(126.0f), vec3(0.0f, 1.0f, 0.0f));
-
-	glUniformMatrix4fv(fullMtxLoc, 1, GL_FALSE, &fullTranformMatrix[0][0]);
-	glDrawElements(GL_TRIANGLES, myShape.numIndices, GL_UNSIGNED_SHORT, 0);
+	glDrawElementsInstanced(GL_TRIANGLES, myShape.numIndices, GL_UNSIGNED_SHORT, 0, 2);
 
 	//sendTriOpenGL();
 	//std::cout << numTris << std::endl;

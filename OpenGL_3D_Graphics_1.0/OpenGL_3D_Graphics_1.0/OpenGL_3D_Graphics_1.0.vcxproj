@@ -116,7 +116,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)..\MiddleWare\Qt\lib;$(ProjectDir)..\MiddleWare\glew\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib; glew32d.lib; Qt6OpenGLWidgets.lib; Qt6Widgets.lib; Qt6Core.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32d.lib;Qt6OpenGLWidgets.lib;Qt6Widgets.lib;Qt6Core.lib;Qt6Gui.lib;Qt63DInput.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -136,11 +136,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GlWindow.cpp" />
     <ClCompile Include="OpenGL_3D_Graphics_1.0.cpp" />
     <ClCompile Include="ShapeGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="GlWindow.h" />
     <ClInclude Include="ShapeData.h" />
     <ClInclude Include="ShapeGenerator.h" />
