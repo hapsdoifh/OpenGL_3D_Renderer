@@ -13,6 +13,8 @@
 #include <Camera.h>
 #include <Qt3DInput/qmouseevent.h>
 #include <QtGui/qevent.h>
+#include <stb_image.h>
+
 
 using glm::mat4;
 using glm::vec3;
@@ -26,50 +28,74 @@ Camera myCamera;
 ShapeData myShape = ShapeGenerator::makeCube();
 
 GLuint programID;
+GLuint cubeVertexArrayObjID;
+GLuint CubeVertBuffID;
+GLuint cubeIndexBufferID;
 
 GlWindow::~GlWindow() {
 	glUseProgram(0); //stop using the program
 	glDeleteProgram(programID);
 }
 
-void GlWindow::sendDataToOpenGL() {
+void GlWindow::setupVertexArrays() {
+	glGenVertexArrays(1, &cubeVertexArrayObjID);
+
+	glBindVertexArray(cubeVertexArrayObjID);
+	//all the buffer states from this point will be stored in the vertex array object
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, CubeVertBuffID);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 8, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 8, (char*)(sizeof(GL_FLOAT) * 3));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeIndexBufferID); 
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);	
+}
+
+GLuint texture;
+void GlWindow::sendDataToOpenGL() { //basically sending the model data down to opengl
 	
 
-	GLuint myBUFFID;
-	glGenBuffers(1, &myBUFFID); //creates a object-like buffer
-	glBindBuffer(GL_ARRAY_BUFFER, myBUFFID); //binds buffer to array_buffer binding point
-	glBufferData(GL_ARRAY_BUFFER, myShape.vertexBufferSize(), myShape.vertices, GL_DYNAMIC_DRAW);  // Sends buffer data down to gpu
+	glGenBuffers(1, &CubeVertBuffID); //creates a object-like buffer
+	glBindBuffer(GL_ARRAY_BUFFER, CubeVertBuffID); //binds buffer to array_buffer binding point
+	glBufferData(GL_ARRAY_BUFFER, myShape.vertexBufferSize(), myShape.vertices, GL_STATIC_DRAW);  // Sends buffer data down to gpu
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 6 /*start of one vert data to another*/, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 8 /*start of one vert data to another*/, 0);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 6, (char*)(sizeof(GL_FLOAT) * 3));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GL_FLOAT) * 8, (char*)(sizeof(GL_FLOAT) * 3));
 
 	//GLushort because models generally have ubyte < size < uint number of indices and ushort is a nice fit
 	//GLushort indices[] = { 0,1,2,3,4,5 };
-	GLuint indexBufferID;
-	glGenBuffers(1, &indexBufferID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, myShape.indexBufferSize(), myShape.indices, GL_DYNAMIC_DRAW);
+	glGenBuffers(1, &cubeIndexBufferID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeIndexBufferID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, myShape.indexBufferSize(), myShape.indices, GL_STATIC_DRAW);
 
 	myShape.cleanup();
 
-	GLuint TransformMatrixBuffID;
-	glGenBuffers(1, &TransformMatrixBuffID);
-	glBindBuffer(GL_ARRAY_BUFFER, TransformMatrixBuffID);
+	//GLuint TransformMatrixBuffID;
+	//glGenBuffers(1, &TransformMatrixBuffID);
+	//glBindBuffer(GL_ARRAY_BUFFER, TransformMatrixBuffID);
 
-	glBufferData(GL_ARRAY_BUFFER,sizeof(mat4)*2, 0, GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 0));
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 4));
-	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 8));
-	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 12));
+	//Textures
+
+	int widthImg, heightImg, numColorCh;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* bytes = stbi_load("Gaben.png", &widthImg, &heightImg, &numColorCh, 0);
+
 	glEnableVertexAttribArray(2);
-	glEnableVertexAttribArray(3);
-	glEnableVertexAttribArray(4);
-	glEnableVertexAttribArray(5);
-	glVertexAttribDivisor(2, 1);
-	glVertexAttribDivisor(3, 1);
-	glVertexAttribDivisor(4, 1);
-	glVertexAttribDivisor(5, 1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 8, (char*)(sizeof(GL_FLOAT) * 6));
+
+	glGenTextures(1, &texture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 bool GlWindow::checkShaderStatus(GLuint ShaderID) {
@@ -178,8 +204,11 @@ void GlWindow::sendTriOpenGL() {
 void GlWindow::initializeGL() {
 	setMouseTracking(true);
 	glewInit();
-	glEnable(GL_DEPTH_TEST); 
+	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
 	sendDataToOpenGL();
+	//setupVertexArrays();
 	installShaders(); 
 }
 
@@ -224,6 +253,15 @@ void GlWindow::keyPressEvent(QKeyEvent* event) {
 }
 void GlWindow::paintGL() {
 
+	glViewport(0, 0, width(), height());
+	glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+	glClear(GL_DEPTH_BUFFER);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glUseProgram(programID);
+	GLuint text0Uni = glGetUniformLocation(programID, "tex0");
+	glUniform1i(text0Uni, 0.5);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
 	mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), ((float)width()) / height(), 0.1f, 100.0f); //project front plane close, far plane way far
 	mat4 modelTranslateMatrix = glm::translate(projectionMatrix, vec3(-1.0f, 0.0f, -3.0f));
 	mat4 fullTranformMatrix = glm::rotate(modelTranslateMatrix, glm::radians(36.0f), vec3(1.0f, 0.0f, 0.0f));
@@ -232,21 +270,16 @@ void GlWindow::paintGL() {
 		projectionMatrix * myCamera.getWorldToViewMatrix() * glm::translate(mat4(1.0f), vec3(-1.0f, 0.0f, -3.0f)) * glm::rotate(mat4(1.0f), glm::radians(36.0f), vec3(1.0f, 0.0f, 0.0f)),
 		projectionMatrix * myCamera.getWorldToViewMatrix() * glm::translate(mat4(1.0f), vec3(1.0f, 0.0f, -3.75f)) * glm::rotate(mat4(1.0f), glm::radians(126.0f), vec3(0.0f,1.0f, 0.0f))
 	};
-	glBufferData(GL_ARRAY_BUFFER, sizeof(fullTransforms), fullTransforms, GL_DYNAMIC_DRAW);
-	//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(fullTransforms), fullTransforms);
+	//glBindVertexArray(cubeVertexArrayObjID);
+	GLuint MatLoc = glGetUniformLocation(programID, "fullTransformationMatrix");
+	glUniformMatrix4fv(MatLoc, 1, GL_FALSE, &fullTransforms[0][0][0]);
+	//glUniformMatrix4fv(MatLoc, 1, GL_FALSE, &mat4(1.0f)[0][0]);
+	glDrawElements(GL_TRIANGLES, myShape.numIndices, GL_UNSIGNED_SHORT, 0);
 
-	glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-	glClear(GL_DEPTH_BUFFER);
-	glClear(GL_COLOR_BUFFER_BIT); 
+	//glBindVertexArray(cubeVertexArrayObjID);
+	////MatLoc = glGetUniformLocation(programID, "fullTransformationMatrix");
+	//glUniformMatrix4fv(MatLoc, 1, GL_FALSE, &fullTransforms[1][0][0]);
+	//glDrawElements(GL_TRIANGLES, myShape.numIndices, GL_UNSIGNED_SHORT, 0);
+	//glDrawElementsInstanced(GL_TRIANGLES, myShape.numIndices, GL_UNSIGNED_SHORT, 0, 2);
 
-	glViewport(0, 0, width(), height());
-	//glm::vec3 domColor(1.0f, 1.0f, 0.0f);
-	//GLint domColorUniLocation = glGetUniformLocation(programID, "domColor");
-	//glUniform3fv(domColorUniLocation, 1, &domColor[0]);
-
-	glDrawElementsInstanced(GL_TRIANGLES, myShape.numIndices, GL_UNSIGNED_SHORT, 0, 2);
-
-	//sendTriOpenGL();
-	//std::cout << numTris << std::endl;
-	//glDrawArrays(GL_TRIANGLES, 0, 3);
 }

@@ -21,7 +21,7 @@ private:
 	bool checkProgramStatus(GLuint programID);
 	std::string readShaderFile(const char* fileName);
 	void sendTriOpenGL();
-
+	void setupVertexArrays();
 };
 
 #endif
