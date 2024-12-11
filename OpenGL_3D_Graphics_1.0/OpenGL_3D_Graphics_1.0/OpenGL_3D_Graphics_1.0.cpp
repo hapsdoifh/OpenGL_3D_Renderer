@@ -3,15 +3,15 @@
 
 //#include <iostream>
 #include <QtWidgets/qapplication.h>
-#include <GlWindow.h>
+#include <GLWindow.h>
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc, argv);
-    GlWindow testWindow;
+   /* QApplication app(argc, argv);
+    GLWindow testWindow;
     testWindow.resize(1000, 600);
     testWindow.show();
-    return app.exec();
+    return app.exec();*/
     return 0;
 }
 
