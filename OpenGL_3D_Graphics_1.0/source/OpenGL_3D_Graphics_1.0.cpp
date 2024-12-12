@@ -1,4 +1,4 @@
-// OpenGL_3D_Graphics_1.0.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// source.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
 //#include <iostream>
