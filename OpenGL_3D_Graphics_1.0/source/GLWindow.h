@@ -1,8 +1,8 @@
 #pragma once
-#include <QtOpenGLWidgets/qopenglwidget.h>
 #include <glm/glm.hpp>
+#include <glad.h>
 
-class GLWindow : public QOpenGLWidget{
+class GLWindow{
 	
 	
 public:
