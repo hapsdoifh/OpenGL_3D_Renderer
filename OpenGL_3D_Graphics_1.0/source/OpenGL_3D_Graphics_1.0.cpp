@@ -28,15 +28,17 @@ int main(int argc, char* argv[])
     // if (err != GL_NO_ERROR) {
     //     std::cerr << "OpenGL error: " << err << std::endl;
     // }
-    gladLoadGL();
+    gladLoadGL(); //doesn't work without this line
     glfwSetKeyCallback(myWindow, key_callback);
     while(!glfwWindowShouldClose(myWindow)) {
         int width, height;
         glfwGetFramebufferSize(myWindow, &width, &height);
         glViewport(0,0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
+	    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 
-        // glfwSwapBuffers(myWindow);
+        glfwSwapBuffers(myWindow);
+
         //absolutely neccessary otherwise you get unclosable transparent window that hogs resources
         glfwPollEvents();
     }
@@ -49,7 +51,7 @@ int main(int argc, char* argv[])
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug prograam: F5 or Debug > Start Debugging menu
 
-// Tips for Getting Started: 
+// Tips for Getting Started:
 //   1. Use the Solution Explorer window to add/manage files
 //   2. Use the Team Explorer window to connect to source control
 //   3. Use the Output window to see build output and other messages
