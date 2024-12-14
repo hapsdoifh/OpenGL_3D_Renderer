@@ -25,6 +25,4 @@ public:
     void importData(); //FUTURE TODO
 };
 
-
-
 #endif //SHAPEBUILDER_H
