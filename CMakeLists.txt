@@ -21,7 +21,7 @@ add_executable(OpenGL_3D_Renderer
     OpenGL_3D_Graphics_1.0/Dependencies/GLFW/glfw3.h
     OpenGL_3D_Graphics_1.0/Dependencies/GLFW/glfw3native.h
     OpenGL_3D_Graphics_1.0/source/GLWindow.h
-    OpenGL_3D_Graphics_1.0/source/OpenGL_3D_Graphics_1.0.cpp
+        OpenGL_3D_Graphics_1.0/source/MainWindow.cpp
     OpenGL_3D_Graphics_1.0/source/stb_image.cpp
     OpenGL_3D_Graphics_1.0/source/stb_image.h
         OpenGL_3D_Graphics_1.0/source/GLWindow.cpp

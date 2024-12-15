@@ -3,6 +3,7 @@
 //
 #include <GLWindow.h>
 #include "ShapeBuilder.h"
+#include <unistd.h> //for debug
 #include <fstream>
 
 GLWindow::GLWindow() {
@@ -28,21 +29,47 @@ void GLWindow::createEBO(GLuint size, GLuint* indexDataPtr = nullptr) {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, (void*)indexDataPtr,GL_STATIC_DRAW);
 }
 
+GLuint GLWindow::createVAO() {
+    glGenVertexArrays(1, &vertexArrayID);
+    glBindVertexArray(vertexArrayID);
+}
+
+
 bool GLWindow::readShaderFile(const std::string &path, std::string &dest) {
-    std::ifstream shaderReader(path, std::ios::in);
+    char cwd[100];
+    if(getcwd(cwd, 100) != nullptr) {
+        std::cout << cwd << std::endl;
+    }
+    std::string relative_path = "/Users/harrywang/Projects/OpenGL_3D_Renderer/OpenGL_3D_Graphics_1.0/source/" + path;
+    std::ifstream shaderReader(relative_path, std::ios::in);
     if(shaderReader.is_open()) {
-        dest = {std::istreambuf_iterator<char>(), std::istreambuf_iterator<char>()};
+        dest = {std::istreambuf_iterator<char>(shaderReader), std::istreambuf_iterator<char>()};
         return true;
     }
 
     return false;
 }
 
+void GLWindow::setVertexAttribPtr(GLuint attribLayoutLoc, GLint attribSize, GLint stride, int offset, GLenum dataType, GLenum normalized) {
+    glEnableVertexAttribArray(attribLayoutLoc);
+    glVertexAttribPointer(attribLayoutLoc, attribSize, dataType, normalized, stride, (void*)offset);
+}
 
-GLuint GLWindow::compileShader(GLuint shaderID) {
+
+void GLWindow::createShaders() {
+    vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+    fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+}
+
+void GLWindow::compileShaders() {
+    compileShader(vertexShaderID,"VertexShaderCode.glsl");
+    compileShader(fragmentShaderID,"FragmentShaderCode.glsl");
+}
+
+GLuint GLWindow::compileShader(GLuint shaderID, std::string shaderPath) {
     //load shaders
     std::string shaderCode;
-    if(!readShaderFile("VertexShaderCode.glsl", shaderCode)) {
+    if(!readShaderFile(shaderPath, shaderCode)) {
         std::cout << "Error when reading Vertex Shader, exiting";
         exit(0);
     }
@@ -77,5 +104,6 @@ void GLWindow::creatProgram() {
         std::vector<char> linkMsgLog(logLength + 1);
         glGetProgramInfoLog(programID, logLength, NULL, &linkMsgLog[1]);
         std::cout << std::string(linkMsgLog.begin(), linkMsgLog.end());
+        exit(0);
     }
 }

@@ -2,6 +2,7 @@
 //
 
 #include <GLWindow.h>
+#include <ShapeBuilder.h>
 #include <glfw3.h>
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -16,8 +17,14 @@ int main(int argc, char* argv[])
         std::cout << "glfw initialization failed, exitting";
         exit(0);
     }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     GLFWwindow* myWindow = glfwCreateWindow(640, 480, "OpenGL_Window", NULL, NULL);
     glfwMakeContextCurrent(myWindow);
+    glfwSwapInterval(1);
+
+    glfwSetKeyCallback(myWindow, key_callback);
+
     // std::cout << gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     // if(!myWindow) {
     //     glfwTerminate();
@@ -27,17 +34,42 @@ int main(int argc, char* argv[])
     // if (err != GL_NO_ERROR) {
     //     std::cerr << "OpenGL error: " << err << std::endl;
     // }
+
     gladLoadGL(); //doesn't work without this line
-    glfwSetKeyCallback(myWindow, key_callback);
+
+    // const GLubyte* version = glGetString(GL_VERSION);
+    // const GLubyte* renderer = glGetString(GL_RENDERER);
+    // const GLubyte* vendor = glGetString(GL_VENDOR);
+
+    GLWindow glwindow;
+    ShapeBuilder myCube1;
+    myCube1.buildCube();
+
+    glwindow.createVAO();
+    glwindow.createShaders();
+    glwindow.compileShaders();
+
+    glwindow.creatProgram();
+
+
+    glwindow.createVBO(myCube1.vertexByteSize, myCube1.vertexData);
+    glwindow.createEBO(myCube1.indexByteSize, myCube1.indexData);
+    glwindow.setVertexAttribPtr(0,3,3 * sizeof(GLfloat),0);
+
+    glEnable(GL_DEPTH_TEST);
     while(!glfwWindowShouldClose(myWindow)) {
         int width, height;
         glfwGetFramebufferSize(myWindow, &width, &height);
         glViewport(0,0, width, height);
+        glClear(GL_DEPTH_BUFFER_BIT);
         glClear(GL_COLOR_BUFFER_BIT);
 	    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 
-        glfwSwapBuffers(myWindow);
+        glUseProgram(glwindow.programID);
+        // glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
+        glfwSwapBuffers(myWindow);
         //absolutely neccessary otherwise you get unclosable transparent window that hogs resources
         glfwPollEvents();
     }
@@ -57,3 +89,4 @@ int main(int argc, char* argv[])
 //   4. Use the Error List window to view errors
 //   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
 //   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+

@@ -9,18 +9,22 @@
 
 struct Vertex {
     glm::vec3 position;
-    glm::vec3 color;
-    glm::vec2 texture;
-    glm::vec3 normal;
+    // glm::vec3 color;
+    // glm::vec2 texture;
+    // glm::vec3 normal;
 };
 
 class ShapeBuilder {
 
 public:
-    GLuint numVertices;
-    GLuint numIndices;
-    GLuint byteSize;
     ShapeBuilder();
+    ~ShapeBuilder();
+    GLuint numVertices;
+    GLuint vertexByteSize;
+    GLuint numIndices;
+    GLuint indexByteSize;
+    Vertex* vertexData;
+    GLuint* indexData;
     void buildCube();
     void importData(); //FUTURE TODO
 };
