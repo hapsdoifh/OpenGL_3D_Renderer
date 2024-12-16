@@ -29,7 +29,7 @@ void GLWindow::createEBO(GLuint size, GLuint* indexDataPtr = nullptr) {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, (void*)indexDataPtr,GL_STATIC_DRAW);
 }
 
-GLuint GLWindow::createVAO() {
+void GLWindow::createVAO() {
     glGenVertexArrays(1, &vertexArrayID);
     glBindVertexArray(vertexArrayID);
 }
@@ -106,4 +106,23 @@ void GLWindow::creatProgram() {
         std::cout << std::string(linkMsgLog.begin(), linkMsgLog.end());
         exit(0);
     }
+    glUseProgram(programID);
+}
+
+mat4 GLWindow::sendFullMatrix(int width, int height) {
+    //glm transformations follow normal conventions, eg: translate(A,B) = A*B
+
+    //model (to world) => should it be done here? this is completed when placing models into the world
+    mat4 translateMat = glm::translate(mat4(1.0f),vec3(0.0f,0.0f,-3.0f));
+    mat4 rotateMat = glm::rotate(mat4(1.0f),glm::radians(30.0f),vec3(1.0f,0.0f,0.0f));
+
+    //TODO:view (to view) => need camera class
+
+    //projection (to projection)
+    mat4 projMat = glm::perspective(glm::radians(60.0f), (float)width/height, 0.1f, 100.0f);
+    mat4 finalMat = projMat * translateMat * rotateMat;
+
+    GLint fullTransMatLoc = glGetUniformLocation(programID, "fullTransformMat");
+    glUniformMatrix4fv(fullTransMatLoc, 1, GL_FALSE, &finalMat[0][0]);
+    return finalMat;
 }

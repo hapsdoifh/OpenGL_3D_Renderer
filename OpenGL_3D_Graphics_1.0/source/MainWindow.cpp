@@ -51,26 +51,29 @@ int main(int argc, char* argv[])
 
     glwindow.creatProgram();
 
-
     glwindow.createVBO(myCube1.vertexByteSize, myCube1.vertexData);
     glwindow.createEBO(myCube1.indexByteSize, myCube1.indexData);
     glwindow.setVertexAttribPtr(0,3,3 * sizeof(GLfloat),0);
 
     glEnable(GL_DEPTH_TEST);
+
     while(!glfwWindowShouldClose(myWindow)) {
         int width, height;
+        //what does this do? pulled it form glfw example page
         glfwGetFramebufferSize(myWindow, &width, &height);
+
         glViewport(0,0, width, height);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
 	    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 
-        glUseProgram(glwindow.programID);
         // glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glwindow.sendFullMatrix(width, height);
         glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
         glfwSwapBuffers(myWindow);
-        //absolutely neccessary otherwise you get unclosable transparent window that hogs resources
+        //absolutely necessary otherwise you get unclosable transparent window that hogs resources
         glfwPollEvents();
     }
 
