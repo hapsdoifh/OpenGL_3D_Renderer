@@ -11,7 +11,7 @@ struct Vertex {
     glm::vec3 position;
     // glm::vec3 color;
     // glm::vec2 texture;
-    // glm::vec3 normal;
+    glm::vec3 normal;
 };
 
 class ShapeBuilder {
@@ -25,7 +25,7 @@ public:
     GLuint indexByteSize;
     Vertex* vertexData;
     GLuint* indexData;
-    void buildCube();
+    void buildCube(GLfloat sideLength=0, glm::vec3 color=glm::vec3(0,0,0));
     void importData(); //FUTURE TODO
 };
 

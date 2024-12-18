@@ -113,7 +113,7 @@ mat4 GLWindow::sendFullMatrix(int width, int height) {
     //glm transformations follow normal conventions, eg: translate(A,B) = A*B
 
     //model (to world) => should it be done here? this is completed when placing models into the world
-    mat4 translateMat = glm::translate(mat4(1.0f),vec3(0.0f,0.0f,-3.0f));
+    mat4 translateMat = glm::translate(mat4(1.0f),vec3(0.0f,0.0f,-5.0f));
     mat4 rotateMat = glm::rotate(mat4(1.0f),glm::radians(30.0f),vec3(1.0f,0.0f,0.0f));
 
     //TODO:view (to view) => need camera class
@@ -124,5 +124,13 @@ mat4 GLWindow::sendFullMatrix(int width, int height) {
 
     GLint fullTransMatLoc = glGetUniformLocation(programID, "fullTransformMat");
     glUniformMatrix4fv(fullTransMatLoc, 1, GL_FALSE, &finalMat[0][0]);
+
+    GLint lightPosLoc = glGetUniformLocation(programID, "lightPos");
+    glm::vec3 lightPos(0.0f,6.0f,0.0f);
+    glUniform3fv(lightPosLoc, 1, &lightPos[0]);
+
+    GLint normalMatLoc = glGetUniformLocation(programID, "normalRotateMat");
+    glUniformMatrix3fv(normalMatLoc, 1, GL_FALSE, &mat3(rotateMat)[0][0]);
+
     return finalMat;
 }

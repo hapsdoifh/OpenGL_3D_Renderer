@@ -53,7 +53,9 @@ int main(int argc, char* argv[])
 
     glwindow.createVBO(myCube1.vertexByteSize, myCube1.vertexData);
     glwindow.createEBO(myCube1.indexByteSize, myCube1.indexData);
-    glwindow.setVertexAttribPtr(0,3,3 * sizeof(GLfloat),0);
+
+    glwindow.setVertexAttribPtr(0,3,6 * sizeof(GLfloat), 0);
+    glwindow.setVertexAttribPtr(1,3,6 * sizeof(GLfloat), 3 * sizeof(GLfloat));
 
     glEnable(GL_DEPTH_TEST);
 
