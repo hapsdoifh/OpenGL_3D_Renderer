@@ -5,12 +5,6 @@
 #include <ShapeBuilder.h>
 #include <glfw3.h>
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }
-}
-
 int main(int argc, char* argv[])
 {
     if(!glfwInit()) {
@@ -23,8 +17,8 @@ int main(int argc, char* argv[])
     glfwMakeContextCurrent(myWindow);
     glfwSwapInterval(1);
 
-    glfwSetKeyCallback(myWindow, key_callback);
-
+    glfwSetKeyCallback(myWindow, &GLWindow::handleKeyCallback);
+    glfwSetCursorPosCallback(myWindow, &GLWindow::handleMouseCallback);
     // std::cout << gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     // if(!myWindow) {
     //     glfwTerminate();

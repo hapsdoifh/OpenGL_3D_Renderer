@@ -6,6 +6,10 @@
 #include <unistd.h> //for debug
 #include <fstream>
 
+int GLWindow::pollKey = 0;
+int GLWindow::pollAction = 0;
+int GLWindow::pollUpdate = 0;
+
 GLWindow::GLWindow() {
 
 }
@@ -13,7 +17,6 @@ GLWindow::GLWindow() {
 GLWindow::~GLWindow() {
 
 }
-
 
 void GLWindow::createVBO(GLuint size, Vertex* vertexDataPtr = nullptr) {
     glGenBuffers(1, &vertexBufferID);
@@ -133,4 +136,27 @@ mat4 GLWindow::sendFullMatrix(int width, int height) {
     glUniformMatrix3fv(normalMatLoc, 1, GL_FALSE, &mat3(rotateMat)[0][0]);
 
     return finalMat;
+}
+
+void GLWindow::handleKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }else {
+        pollAction = action;
+        pollKey = key;
+        pollUpdate = noUpdate;
+    }
+}
+
+void GLWindow::handleMouseCallback(GLFWwindow *window, double xpos, double ypos) {
+    //TODO => Add mouse movement handling
+
+}
+
+
+void GLWindow::getPollingUpdate() {
+    if(pollUpdate == noUpdate) {
+        myCam.cameraUpdateKeyboard(pollKey, pollAction);
+    }
+
 }
