@@ -13,9 +13,10 @@ class Camera {
     glm::vec3 cameraPos;
     glm::vec3 lookAt;
     glm::vec3 cameraUP;
+    glm::vec2 mouseLastPos;
 public:
     Camera();
-    void cameraUpdateMouse();
+    void cameraUpdateMouse(double x, double y);
     void cameraUpdateKeyboard(int key, int action);
     glm::mat4 worldToCamMatrix();
 };

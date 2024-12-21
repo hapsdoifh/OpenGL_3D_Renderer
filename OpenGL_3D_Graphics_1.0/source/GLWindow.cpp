@@ -7,8 +7,12 @@
 #include <fstream>
 
 int GLWindow::pollKey = 0;
-int GLWindow::pollAction = 0;
-int GLWindow::pollUpdate = 0;
+int GLWindow::pollKeyAction = 0;
+
+double GLWindow::pollMouseX = 0.0f;
+double GLWindow::pollMouseY = 0.0f;
+
+int GLWindow::pollUpdate = noUpdate;
 
 GLWindow::GLWindow() {
 
@@ -123,7 +127,8 @@ mat4 GLWindow::sendFullMatrix(int width, int height) {
 
     //projection (to projection)
     mat4 projMat = glm::perspective(glm::radians(60.0f), (float)width/height, 0.1f, 100.0f);
-    mat4 finalMat = projMat * translateMat * rotateMat;
+    mat4 viewMat = myCam.worldToCamMatrix();
+    mat4 finalMat = projMat * viewMat * translateMat * rotateMat;
 
     GLint fullTransMatLoc = glGetUniformLocation(programID, "fullTransformMat");
     glUniformMatrix4fv(fullTransMatLoc, 1, GL_FALSE, &finalMat[0][0]);
@@ -142,21 +147,25 @@ void GLWindow::handleKeyCallback(GLFWwindow* window, int key, int scancode, int 
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }else {
-        pollAction = action;
+        pollKeyAction = action;
         pollKey = key;
-        pollUpdate = noUpdate;
+        pollUpdate |= keyUpdate;
     }
 }
 
 void GLWindow::handleMouseCallback(GLFWwindow *window, double xpos, double ypos) {
     //TODO => Add mouse movement handling
-
+    pollUpdate |= mouseUpdate;
+    pollMouseX = xpos;
+    pollMouseY = ypos;
 }
 
 
 void GLWindow::getPollingUpdate() {
-    if(pollUpdate == noUpdate) {
-        myCam.cameraUpdateKeyboard(pollKey, pollAction);
+    if(pollUpdate & keyUpdate) {
+        myCam.cameraUpdateKeyboard(pollKey, pollKeyAction);
     }
-
+    if(pollUpdate & mouseUpdate) {
+        myCam.cameraUpdateMouse(pollMouseX, pollMouseY);
+    }
 }

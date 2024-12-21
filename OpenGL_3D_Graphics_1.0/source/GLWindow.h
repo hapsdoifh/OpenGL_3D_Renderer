@@ -12,9 +12,9 @@ using glm::mat3;
 using glm::mat4;
 
 enum updateType {
-	noUpdate = 0,
-	keyUpdate = 1,
-	mouseUpdate = 2,
+	noUpdate = 0b00,
+	keyUpdate = 0b01,
+	mouseUpdate = 0b10,
 };
 
 class GLWindow{
@@ -27,8 +27,12 @@ class GLWindow{
 
 	GLuint vertexArrayID;
 
-	static int pollAction;
+	static int pollKeyAction;
 	static int pollKey;
+
+	static double pollMouseX;
+	static double pollMouseY;
+
 	static int pollUpdate;
 
 	Camera myCam;

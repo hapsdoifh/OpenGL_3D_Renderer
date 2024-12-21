@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 	    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 
         // glDrawArrays(GL_TRIANGLES, 0, 3);
-
+        glwindow.getPollingUpdate();
         glwindow.sendFullMatrix(width, height);
         glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
