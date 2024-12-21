@@ -15,6 +15,7 @@ enum updateType {
 	noUpdate = 0b00,
 	keyUpdate = 0b01,
 	mouseUpdate = 0b10,
+	mouseBtnUpdate = 0b100
 };
 
 class GLWindow{
@@ -29,6 +30,9 @@ class GLWindow{
 
 	static int pollKeyAction;
 	static int pollKey;
+
+	static int pollMouseBtnAction;
+	static int pollMouseBtn;
 
 	static double pollMouseX;
 	static double pollMouseY;
@@ -56,6 +60,8 @@ public:
 
 	static void handleKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	static void handleMouseCallback(GLFWwindow* window, double xpos, double ypos);
+	static void handleMouseBtnCallback(GLFWwindow* window, int button, int action, int mods);
+
 	void getPollingUpdate();
 
 	mat4 sendFullMatrix(int width, int height);

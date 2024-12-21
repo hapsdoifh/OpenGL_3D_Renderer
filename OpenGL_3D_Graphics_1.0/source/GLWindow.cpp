@@ -9,6 +9,9 @@
 int GLWindow::pollKey = 0;
 int GLWindow::pollKeyAction = 0;
 
+int GLWindow::pollMouseBtn = 0;
+int GLWindow::pollMouseBtnAction = 0;
+
 double GLWindow::pollMouseX = 0.0f;
 double GLWindow::pollMouseY = 0.0f;
 
@@ -160,12 +163,17 @@ void GLWindow::handleMouseCallback(GLFWwindow *window, double xpos, double ypos)
     pollMouseY = ypos;
 }
 
+void GLWindow::handleMouseBtnCallback(GLFWwindow *window, int button, int action, int mods) {
+    pollUpdate |= mouseBtnUpdate;
+    pollMouseBtn = button;
+    pollMouseBtnAction = action;
+}
 
 void GLWindow::getPollingUpdate() {
-    if(pollUpdate & keyUpdate) {
+    if(pollUpdate & keyUpdate)
         myCam.cameraUpdateKeyboard(pollKey, pollKeyAction);
-    }
-    if(pollUpdate & mouseUpdate) {
+    if(pollUpdate & mouseUpdate)
         myCam.cameraUpdateMouse(pollMouseX, pollMouseY);
-    }
+    if(pollUpdate & mouseBtnUpdate)
+        myCam.cameraUpdateMouseBtn(pollMouseBtn, pollMouseBtnAction);
 }

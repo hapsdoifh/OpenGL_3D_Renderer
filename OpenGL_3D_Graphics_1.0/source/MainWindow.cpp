@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
 
     glfwSetKeyCallback(myWindow, &GLWindow::handleKeyCallback);
     glfwSetCursorPosCallback(myWindow, &GLWindow::handleMouseCallback);
+    glfwSetMouseButtonCallback(myWindow, &GLWindow::handleMouseBtnCallback);
     // std::cout << gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     // if(!myWindow) {
     //     glfwTerminate();

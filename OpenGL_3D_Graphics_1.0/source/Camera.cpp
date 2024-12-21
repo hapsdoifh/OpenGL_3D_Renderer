@@ -14,7 +14,8 @@ Camera::Camera():
 cameraPos(0.0,0.0,0.0),
 lookAt(0.0,0.0,-1.0),
 cameraUP(0.0,1.0,0.0),
-mouseLastPos(0.0,0.0)
+mouseLastPos(0.0,0.0),
+mousePressed(0)
 {
 }
 
@@ -50,10 +51,18 @@ void Camera::cameraUpdateMouse(double x, double y) {
     double deltX = x - mouseLastPos.x;
     double deltY = y - mouseLastPos.y;
     mouseLastPos = glm::vec2(x,y);
+    if(!mousePressed)
+        return;
     vec3 rotateAxisX = glm::cross(lookAt, cameraUP);
     lookAt = mat3(glm::rotate(mat4(1.0f),glm::radians(-0.1f * static_cast<float>(deltY)),rotateAxisX)) * lookAt;
     lookAt = mat3(glm::rotate(mat4(1.0f),glm::radians(-0.2f * static_cast<float>(deltX)),cameraUP)) * lookAt;
     lookAt += 0.001f * glm::vec3(-deltX, -deltY, 0.0f);
+    mousePressed = 0;
+}
+
+void Camera::cameraUpdateMouseBtn(int button, int action) {
+    if(action == GLFW_PRESS || action == GLFW_REPEAT)
+        mousePressed = 1;
 }
 
 
