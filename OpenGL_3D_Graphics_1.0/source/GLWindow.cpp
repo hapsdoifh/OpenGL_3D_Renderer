@@ -6,6 +6,7 @@
 #include <unistd.h> //for debug
 #include <fstream>
 
+
 int GLWindow::pollKey = 0;
 int GLWindow::pollKeyAction = 0;
 
@@ -47,10 +48,12 @@ void GLWindow::createVAO() {
 
 bool GLWindow::readShaderFile(const std::string &path, std::string &dest) {
     char cwd[100];
-    if(getcwd(cwd, 100) != nullptr) {
+s    if(getcwd(cwd, 100) != nullptr) {
         std::cout << cwd << std::endl;
     }
-    std::string relative_path = "/Users/harrywang/Projects/OpenGL_3D_Renderer/OpenGL_3D_Graphics_1.0/source/" + path;
+    std::string curPath = cwd;
+    // std::string relative_path = curPath + "\\..\\OpenGL_3D_Graphics_1.0\\source\\" + path;
+    std::string relative_path = curPath + "/../OpenGL_3D_Graphics_1.0/source/" + path;
     std::ifstream shaderReader(relative_path, std::ios::in);
     if(shaderReader.is_open()) {
         dest = {std::istreambuf_iterator<char>(shaderReader), std::istreambuf_iterator<char>()};

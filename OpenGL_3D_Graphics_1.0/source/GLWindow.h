@@ -6,6 +6,7 @@
 #include <iostream>
 #include <glfw3.h>
 #include <Camera.h>
+#include <vector>
 
 using glm::vec3;
 using glm::mat3;
