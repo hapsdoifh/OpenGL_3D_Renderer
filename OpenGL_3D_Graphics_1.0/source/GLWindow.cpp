@@ -48,7 +48,7 @@ void GLWindow::createVAO() {
 
 bool GLWindow::readShaderFile(const std::string &path, std::string &dest) {
     char cwd[100];
-s    if(getcwd(cwd, 100) != nullptr) {
+    if(getcwd(cwd, 100) != nullptr) {
         std::cout << cwd << std::endl;
     }
     std::string curPath = cwd;

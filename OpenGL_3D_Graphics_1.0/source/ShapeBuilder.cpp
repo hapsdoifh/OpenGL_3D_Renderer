@@ -3,6 +3,7 @@
 //
 
 #include "ShapeBuilder.h"
+#include <iostream>
 
 //dynamically allocated memory, need to be deleted
 //TODO: make the memory cleanup local to this class
