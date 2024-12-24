@@ -4,4 +4,10 @@ cmake-build-debug/
 
 cmake-build-debug-event-trace/
 
+*.dll
 
+*.lib
+
+*.3.dylib
+
+*.a

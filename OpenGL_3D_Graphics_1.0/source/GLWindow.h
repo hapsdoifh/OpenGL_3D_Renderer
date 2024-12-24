@@ -24,10 +24,10 @@ class GLWindow{
 	GLuint vertexShaderID;
 	GLuint fragmentShaderID;
 
-	GLuint vertexBufferID;
-	GLuint indexBufferID;
+	std::vector<GLuint> vertexBufferIDs;
+	std::vector<GLuint> indexBufferIDs;
 
-	GLuint vertexArrayID;
+	std::vector<GLuint> vertexArrayIDs;
 
 	static int pollKeyAction;
 	static int pollKey;
@@ -53,10 +53,12 @@ public:
 	void createEBO(GLuint, GLuint* indexData); //Element Buffer Object
 	void createShaders();
 	void createVAO();
+	void bindVAO(int index);
+	void unbindVAO(int index);
 
 	void setVertexAttribPtr(GLuint attribLayoutLoc, GLint attribSize, GLint stride, int offset, GLenum dataType=GL_FLOAT, GLenum normalized=GL_FALSE);
 	GLuint compileShader(GLuint shaderID, std::string shaderPath);
-	void compileShaders();
+	void compileShaders(std::string vshaderPath="VertexShaderCode.glsl", std::string fshaderPath="FragmentShaderCode.glsl");
 	void creatProgram();
 
 	static void handleKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);

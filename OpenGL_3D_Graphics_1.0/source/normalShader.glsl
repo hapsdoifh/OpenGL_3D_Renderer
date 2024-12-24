@@ -18,6 +18,6 @@ void main(){
     vec3 transformedNorm = normalRotateMat * normal;
     vec3 lightDir = normalize(lightPos - vec3(fullTransformMat*v));
     float intensity = max(dot(transformedNorm, lightDir),0.0f);
-    //theColor = intensity * vec3(1.0,1.0,1.0);
-    theColor = vec3(1.0,1.0,1.0);
+    theColor = intensity * vec3(1.0,1.0,1.0);
+    //theColor = ambient;
 }

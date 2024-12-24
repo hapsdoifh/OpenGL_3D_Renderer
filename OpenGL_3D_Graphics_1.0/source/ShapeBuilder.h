@@ -26,7 +26,8 @@ public:
     GLuint indexByteSize;
     Vertex* vertexData;
     GLuint* indexData;
-    void buildCube(GLfloat sideLength=0, glm::vec3 color=glm::vec3(0,0,0));
+    void buildCube(GLfloat sideLengthScale=1.0f, glm::vec3 color=glm::vec3(0,0,0));
+    void buildNormals(ShapeBuilder& srcShape);
     void importData(); //FUTURE TODO
 };
 

@@ -31,23 +31,23 @@
 //     memcpy(indexData, cubeInds, indexByteSize);
 // }
 
-void ShapeBuilder::buildCube(GLfloat sideLength, glm::vec3 color) {
+void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
     vertexData = new Vertex[numVertices];
 
-    for(int i{0}; i<8; i++) {
-        vertexData[i] = vertexData[0];
-    }
+    // for(int i{0}; i<8; i++) {
+    //     vertexData[i] = vertexData[0];
+    // }
 
     Vertex cubeVerts[] {
-        glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
-        glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
-        glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
-        glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
 
-        glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0.0,0.0,0.0),
-        glm::vec3(1.0f, 1.0f, -1.0f), glm::vec3(0.0,0.0,0.0),
-        glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0,0.0,0.0),
-        glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(0.0,0.0,0.0)
+        sideLengthScale * glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, 1.0f, -1.0f), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(0.0,0.0,0.0)
     };
 
     // GLuint cubeInds[] {
@@ -97,6 +97,21 @@ void ShapeBuilder::buildCube(GLfloat sideLength, glm::vec3 color) {
     memcpy(indexData, cubeInds, indexByteSize);
 }
 
+void ShapeBuilder::buildNormals(ShapeBuilder &srcShape) {
+    numVertices = srcShape.numVertices * 2;
+    vertexByteSize = numVertices * sizeof(Vertex);
+    vertexData = new Vertex[numVertices];
+    int normVertCnt = 0;
+    //the two points for the normal are the actual shape vertex itself + vertex normal end point
+    for (int i{0}; i < srcShape.numVertices; i++) {
+        vertexData[normVertCnt].position = srcShape.vertexData[i].position;
+        vertexData[normVertCnt + 1].position = srcShape.vertexData[i].position + srcShape.vertexData[i].normal;
+        normVertCnt += 2;
+    }
+    indexData = new GLuint[numVertices];
+    for(int i{0}; i < sizeof(indexData); i++)
+        indexData[i] = i;
+}
 
 ShapeBuilder::ShapeBuilder() {
 

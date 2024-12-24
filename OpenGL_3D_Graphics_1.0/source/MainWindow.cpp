@@ -38,19 +38,39 @@ int main(int argc, char* argv[])
 
     GLWindow glwindow;
     ShapeBuilder myCube1;
-    myCube1.buildCube();
+    myCube1.buildCube(1.0f);
 
-    glwindow.createVAO();
+    ShapeBuilder myNorms1;
+    myNorms1.buildNormals(myCube1);
+
     glwindow.createShaders();
     glwindow.compileShaders();
 
     glwindow.creatProgram();
 
+    glwindow.createVAO();
     glwindow.createVBO(myCube1.vertexByteSize, myCube1.vertexData);
     glwindow.createEBO(myCube1.indexByteSize, myCube1.indexData);
 
     glwindow.setVertexAttribPtr(0,3,6 * sizeof(GLfloat), 0);
     glwindow.setVertexAttribPtr(1,3,6 * sizeof(GLfloat), 3 * sizeof(GLfloat));
+
+    glwindow.unbindVAO(0);
+
+
+    glwindow.createShaders();
+    glwindow.compileShaders();
+
+    glwindow.creatProgram();
+
+    glwindow.createVAO();
+    glwindow.createVBO(myNorms1.vertexByteSize, myNorms1.vertexData);
+    glwindow.createEBO(myNorms1.indexByteSize, myNorms1.indexData);
+
+    glwindow.setVertexAttribPtr(0,3,6 * sizeof(GLfloat), 0);
+    // glwindow.setVertexAttribPtr(1,3,6 * sizeof(GLfloat), 3 * sizeof(GLfloat));
+
+    glwindow.unbindVAO(1);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -66,6 +86,7 @@ int main(int argc, char* argv[])
 
         // glDrawArrays(GL_TRIANGLES, 0, 3);
         glwindow.getPollingUpdate();
+        // glwindow.bindVAO(0);
         glwindow.sendFullMatrix(width, height);
         glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
 

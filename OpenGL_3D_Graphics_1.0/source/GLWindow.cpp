@@ -27,22 +27,46 @@ GLWindow::~GLWindow() {
 }
 
 void GLWindow::createVBO(GLuint size, Vertex* vertexDataPtr = nullptr) {
-    glGenBuffers(1, &vertexBufferID);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
+    GLuint tempVBO;
+    glGenBuffers(1, &tempVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, tempVBO);
+    vertexBufferIDs.push_back(tempVBO);
     if(vertexDataPtr != nullptr)
         glBufferData(GL_ARRAY_BUFFER, size, (void*)vertexDataPtr, GL_STATIC_DRAW);
 }
 
 void GLWindow::createEBO(GLuint size, GLuint* indexDataPtr = nullptr) {
-    glGenBuffers(1, &indexBufferID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
+    GLuint tempEBO;
+    glGenBuffers(1, &tempEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tempEBO);
+    indexBufferIDs.push_back(tempEBO);
     if(indexDataPtr != nullptr) //send data if there is any
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, (void*)indexDataPtr,GL_STATIC_DRAW);
 }
 
 void GLWindow::createVAO() {
-    glGenVertexArrays(1, &vertexArrayID);
-    glBindVertexArray(vertexArrayID);
+    GLuint tempVAO;
+    glGenVertexArrays(1, &tempVAO);
+    glBindVertexArray(tempVAO);
+    vertexArrayIDs.push_back(tempVAO);
+}
+
+void GLWindow::bindVAO(int index) {
+    if (index < vertexArrayIDs.size()) {
+        glBindVertexArray(vertexArrayIDs[index]);
+    }else {
+        std::cout << "VAO ID out of range, index is: " << index << std::endl;
+        std::cout << "VAO list size is: " << vertexArrayIDs.size();
+    }
+}
+
+void GLWindow::unbindVAO(int index) {
+    if (index < vertexArrayIDs.size()) {
+        glBindVertexArray(0);
+    }else {
+        std::cout << "VAO ID out of range, index is: " << index << std::endl;
+        std::cout << "VAO list size is: " << vertexArrayIDs.size();
+    }
 }
 
 
@@ -74,9 +98,9 @@ void GLWindow::createShaders() {
     fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 }
 
-void GLWindow::compileShaders() {
-    compileShader(vertexShaderID,"VertexShaderCode.glsl");
-    compileShader(fragmentShaderID,"FragmentShaderCode.glsl");
+void GLWindow::compileShaders(std::string vshaderPath, std::string fshaderPath) {
+    compileShader(vertexShaderID,vshaderPath.c_str());
+    compileShader(fragmentShaderID,fshaderPath.c_str());
 }
 
 GLuint GLWindow::compileShader(GLuint shaderID, std::string shaderPath) {
