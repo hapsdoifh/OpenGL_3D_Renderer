@@ -29,7 +29,7 @@ class GLWindow{
 
 	std::vector<GLuint> vertexArrayIDs;
 
-	static int pollKeyAction;
+	static glm::vec3 pollKeyMovement;
 	static int pollKey;
 
 	static int pollMouseBtnAction;

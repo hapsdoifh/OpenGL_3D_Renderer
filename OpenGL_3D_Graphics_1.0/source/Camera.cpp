@@ -19,31 +19,10 @@ mousePressed(0)
 {
 }
 
-void Camera::cameraUpdateKeyboard(int key, int action) {
-    if(action != GLFW_PRESS && action != GLFW_REPEAT)
-        return;
-    switch(key) {
-        case GLFW_KEY_A:
-            cameraPos += 0.1f * glm::cross(cameraUP, lookAt);
-            break;
-        case GLFW_KEY_D:
-            cameraPos -= 0.1f * glm::cross(cameraUP, lookAt);
-            break;
-        case GLFW_KEY_W:
-            cameraPos += 0.1f * lookAt;
-            break;
-        case GLFW_KEY_S:
-            cameraPos -= 0.1f * lookAt;
-            break;
-        case GLFW_KEY_SPACE:
-            cameraPos += 0.1f * cameraUP;
-            break;
-        case GLFW_KEY_Z:
-            cameraPos -= 0.1f * cameraUP;
-            break;
-        default:
-            break;
-    }
+void Camera::cameraUpdateKeyboard(int key, glm::vec3 action) {
+    cameraPos += action.x * glm::cross(cameraUP, lookAt);
+    cameraPos += action.y * lookAt;
+    cameraPos += action.z * cameraUP;
 }
 
 void Camera::cameraUpdateMouse(double x, double y) {

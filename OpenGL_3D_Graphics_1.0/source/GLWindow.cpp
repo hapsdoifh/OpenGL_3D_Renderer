@@ -8,7 +8,7 @@
 
 
 int GLWindow::pollKey = 0;
-int GLWindow::pollKeyAction = 0;
+vec3 GLWindow::pollKeyMovement(0.0f,0.0f,0.0f);
 
 int GLWindow::pollMouseBtn = 0;
 int GLWindow::pollMouseBtnAction = 0;
@@ -17,6 +17,8 @@ double GLWindow::pollMouseX = 0.0f;
 double GLWindow::pollMouseY = 0.0f;
 
 int GLWindow::pollUpdate = noUpdate;
+
+using glm::vec3;
 
 GLWindow::GLWindow() {
 
@@ -164,7 +166,7 @@ mat4 GLWindow::sendFullMatrix(int width, int height) {
     glUniformMatrix4fv(fullTransMatLoc, 1, GL_FALSE, &finalMat[0][0]);
 
     GLint lightPosLoc = glGetUniformLocation(programID, "lightPos");
-    glm::vec3 lightPos(0.0f,6.0f,0.0f);
+    vec3 lightPos(0.0f,6.0f,0.0f);
     glUniform3fv(lightPosLoc, 1, &lightPos[0]);
 
     GLint normalMatLoc = glGetUniformLocation(programID, "normalRotateMat");
@@ -176,11 +178,17 @@ mat4 GLWindow::sendFullMatrix(int width, int height) {
 void GLWindow::handleKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }else {
-        pollKeyAction = action;
-        pollKey = key;
-        pollUpdate |= keyUpdate;
+        return;
     }
+    //pollKeyMovement: .x = strafe, .y = lookat, .z = UP
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) pollKeyMovement += 0.1f * vec3(1.0f,0.0f,0.0f);
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) pollKeyMovement -= 0.1f * vec3(1.0f,0.0f,0.0f);
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) pollKeyMovement += 0.1f * vec3(0.0f,1.0f,0.0f);
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) pollKeyMovement -= 0.1f * vec3(0.0f,1.0f,0.0f);
+    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) pollKeyMovement += 0.1f * vec3(0.0f,0.0f,1.0f);
+    if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) pollKeyMovement -= 0.1f * vec3(1.0f,0.0f,1.0f);
+    pollKey = key;
+    pollUpdate |= keyUpdate;
 }
 
 void GLWindow::handleMouseCallback(GLFWwindow *window, double xpos, double ypos) {
@@ -197,8 +205,10 @@ void GLWindow::handleMouseBtnCallback(GLFWwindow *window, int button, int action
 }
 
 void GLWindow::getPollingUpdate() {
-    if(pollUpdate & keyUpdate)
-        myCam.cameraUpdateKeyboard(pollKey, pollKeyAction);
+    if(pollUpdate & keyUpdate) {
+        myCam.cameraUpdateKeyboard(pollKey, pollKeyMovement);
+        pollKeyMovement = vec3(0.0f,0.0f,0.0f);
+    }
     if(pollUpdate & mouseUpdate)
         myCam.cameraUpdateMouse(pollMouseX, pollMouseY);
     if(pollUpdate & mouseBtnUpdate)

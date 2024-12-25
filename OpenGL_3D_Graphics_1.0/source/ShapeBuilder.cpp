@@ -118,6 +118,6 @@ ShapeBuilder::ShapeBuilder() {
 }
 
 ShapeBuilder::~ShapeBuilder() {
-    // delete[] vertexData;
-    // delete[] indexData;
+    delete[] vertexData;
+    delete[] indexData;
 }
