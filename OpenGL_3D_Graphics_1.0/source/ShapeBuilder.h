@@ -9,6 +9,13 @@
 #include <iostream>
 #include <vector>
 
+using glm::vec2;
+using glm::vec3;
+using glm::vec4;
+
+using glm::mat3;
+using glm::vec4;
+
 struct Vertex {
     glm::vec3 position;
     // glm::vec3 color;
@@ -30,6 +37,7 @@ public:
     void buildCube(GLfloat sideLengthScale=1.0f, glm::vec3 color=glm::vec3(0,0,0));
     void buildNormals(ShapeBuilder& srcShape);
     void importData(); //FUTURE TODO
+    void cleanUP();
 };
 
 #endif //SHAPEBUILDER_H

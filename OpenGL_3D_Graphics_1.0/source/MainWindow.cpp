@@ -88,7 +88,9 @@ int main(int argc, char* argv[])
         glCullFace(GL_BACK);
         // glDrawArrays(GL_TRIANGLES, 0, 3);
         glwindow.getPollingUpdate();
-        glwindow.sendFullMatrix(width, height);
+
+        mat4 modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f,0.0f,30.0f));
+        glwindow.sendFullMatrix(width, height, modWorldMat);
         glwindow.bindVAO(0);
         glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
         glwindow.bindVAO(1);
@@ -99,6 +101,9 @@ int main(int argc, char* argv[])
         //absolutely necessary otherwise you get unclosable transparent window that hogs resources
         glfwPollEvents();
     }
+    //
+    // myCube1.cleanUP();
+    myNorms1.cleanUP();
 
     glfwDestroyWindow(myWindow);
     glfwTerminate();

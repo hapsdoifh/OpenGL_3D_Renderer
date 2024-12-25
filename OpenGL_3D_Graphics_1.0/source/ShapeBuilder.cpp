@@ -110,8 +110,15 @@ void ShapeBuilder::buildNormals(ShapeBuilder &srcShape) {
         normVertCnt += 2;
     }
     indexData = new GLuint[numIndices];
-    for(int i{0}; i < sizeof(indexData); i++)
+    for(int i{0}; i < numIndices; i++)
         indexData[i] = i;
+}
+
+void ShapeBuilder::cleanUP() {
+    delete[] vertexData;
+    vertexData = nullptr;
+    delete[] indexData;
+    indexData = nullptr;
 }
 
 ShapeBuilder::ShapeBuilder() {
@@ -119,6 +126,4 @@ ShapeBuilder::ShapeBuilder() {
 }
 
 ShapeBuilder::~ShapeBuilder() {
-    delete[] vertexData;
-    delete[] indexData;
 }

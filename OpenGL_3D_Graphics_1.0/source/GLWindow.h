@@ -67,5 +67,7 @@ public:
 
 	void getPollingUpdate();
 
-	mat4 sendFullMatrix(int width, int height);
+	mat4 generateMovementMat(vec3 position, vec3 rotation);
+	void sendFullMatrix(int width, int height, glm::mat4 = mat4(1.0f), GLfloat FOV = 60.0f);
+	void cleanUP();
 };

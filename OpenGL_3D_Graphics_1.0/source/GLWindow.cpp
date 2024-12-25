@@ -19,6 +19,7 @@ double GLWindow::pollMouseY = 0.0f;
 int GLWindow::pollUpdate = noUpdate;
 
 using glm::vec3;
+using glm::mat3;
 
 GLWindow::GLWindow() {
 
@@ -148,31 +149,37 @@ void GLWindow::creatProgram() {
     glUseProgram(programID);
 }
 
-mat4 GLWindow::sendFullMatrix(int width, int height) {
+mat4 GLWindow::generateMovementMat(vec3 position, vec3 rotation) {
+    GLfloat maxAngle = glm::max(rotation.x, rotation.y, rotation.z);
+    vec3 rotateScale = glm::vec3(rotation.x / maxAngle, rotation.y / maxAngle, rotation.z/maxAngle); //based on rotation.x
+    const mat4 ret = glm::rotate(mat4(1.0f), glm::radians(maxAngle), rotateScale);
+    return glm::translate(ret, position);
+}
+
+
+void GLWindow::sendFullMatrix(int width, int height, mat4 modelWorldMat, GLfloat FOV) {
     //glm transformations follow normal conventions, eg: translate(A,B) = A*B
 
     //model (to world) => should it be done here? this is completed when placing models into the world
-    mat4 translateMat = glm::translate(mat4(1.0f),vec3(0.0f,0.0f,-5.0f));
-    mat4 rotateMat = glm::rotate(mat4(1.0f),glm::radians(0.0f),vec3(1.0f,0.0f,0.0f));
+    // mat4 translateMat = glm::translate(mat4(1.0f),vec3(0.0f,0.0f,-5.0f));
+    // mat4 rotateMat = glm::rotate(mat4(1.0f),glm::radians(0.0f),vec3(1.0f,0.0f,0.0f));
 
     //TODO:view (to view) => need camera class
 
     //projection (to projection)
-    mat4 projMat = glm::perspective(glm::radians(60.0f), (float)width/height, 0.1f, 100.0f);
+    mat4 projMat = glm::perspective(glm::radians(FOV), (float)width/height, 0.1f, 100.0f);
     mat4 viewMat = myCam.worldToCamMatrix();
-    mat4 finalMat = projMat * viewMat * translateMat * rotateMat;
+    mat4 viewProjMat = projMat * viewMat;
 
-    GLint fullTransMatLoc = glGetUniformLocation(programID, "fullTransformMat");
-    glUniformMatrix4fv(fullTransMatLoc, 1, GL_FALSE, &finalMat[0][0]);
+    GLint viewProjMatLoc = glGetUniformLocation(programID, "viewProjMat");
+    glUniformMatrix4fv(viewProjMatLoc, 1, GL_FALSE, &viewProjMat[0][0]);
+
+    GLint modelWorldMatLoc = glGetUniformLocation(programID, "modelWorldMat");
+    glUniformMatrix4fv(modelWorldMatLoc, 1, GL_FALSE, &modelWorldMat[0][0]);
 
     GLint lightPosLoc = glGetUniformLocation(programID, "lightPos");
     vec3 lightPos(0.0f,6.0f,0.0f);
     glUniform3fv(lightPosLoc, 1, &lightPos[0]);
-
-    GLint normalMatLoc = glGetUniformLocation(programID, "normalRotateMat");
-    glUniformMatrix3fv(normalMatLoc, 1, GL_FALSE, &mat3(rotateMat)[0][0]);
-
-    return finalMat;
 }
 
 void GLWindow::handleKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -213,4 +220,8 @@ void GLWindow::getPollingUpdate() {
         myCam.cameraUpdateMouse(pollMouseX, pollMouseY);
     if(pollUpdate & mouseBtnUpdate)
         myCam.cameraUpdateMouseBtn(pollMouseBtn, pollMouseBtnAction);
+}
+
+void GLWindow::cleanUP() {
+    return;
 }
