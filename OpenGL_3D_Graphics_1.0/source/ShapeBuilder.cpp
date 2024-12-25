@@ -37,10 +37,11 @@ void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
     //     vertexData[i] = vertexData[0];
     // }
 
+    //This is still a right handed coordinate system so 1 will be closer than -1 once loaded in (in -z no rotation)
     Vertex cubeVerts[] {
         sideLengthScale * glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
         sideLengthScale * glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, -1.0f,1.0f), glm::vec3(0.0,0.0,0.0),
         sideLengthScale * glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
 
         sideLengthScale * glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0.0,0.0,0.0),
@@ -56,12 +57,12 @@ void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
     // };
 
     GLuint cubeInds[]{
-        0,1,2, 2,1,3,
-        0,4,1, 1,4,5,
-        4,6,5, 5,6,7,
-        2,3,6, 6,3,7,
-        0,2,4, 4,2,6,
-        1,5,3, 3,5,7,
+        0,2,1, 1,2,3,
+        0,1,4, 1,5,4,
+        4,7,6, 5,7,4,
+        2,7,3, 6,7,2,
+        0,4,2, 4,6,2,
+        1,7,5, 1,3,7,
     };
     //calculate vertex normals:
     std::vector<glm::vec3>faceNormals;
@@ -72,7 +73,7 @@ void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
         GLuint currVertexB = cubeInds[faceIt+2];
         edgeVecA = cubeVerts[currVertexA].position - cubeVerts[currVertex].position;
         edgeVecB = cubeVerts[currVertexB].position - cubeVerts[currVertexA].position;
-        glm::vec3 faceNormal = glm::normalize(glm::cross(edgeVecB, edgeVecA)); // weight each face equally, is optional
+        glm::vec3 faceNormal = glm::normalize(glm::cross(edgeVecA, edgeVecB)); // weight each face equally, is optional
 
         cubeVerts[currVertex].normal += faceNormal;
         cubeVerts[currVertexA].normal += faceNormal;

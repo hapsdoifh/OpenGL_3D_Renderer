@@ -15,9 +15,9 @@ out vec2 texCoord;
 void main(){
     vec4 v = vec4(position, 1.0);
     gl_Position = fullTransformMat * v;
-    vec3 transformedNorm = normalRotateMat * normal;
-    vec3 lightDir = normalize(lightPos - vec3(fullTransformMat*v));
+    vec3 transformedNorm = normalize(normalRotateMat * normal);
+    vec3 lightDir = normalize(lightPos - vec3(normalRotateMat*position));
     float intensity = max(dot(transformedNorm, lightDir),0.0f);
-    //theColor = intensity * vec3(1.0,1.0,1.0);
-    theColor = vec3(1.0,1.0,1.0);
+    theColor = intensity * vec3(1.0,1.0,1.0);
+    //theColor = vec3(1.0,1.0,1.0);
 }

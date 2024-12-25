@@ -56,24 +56,25 @@ int main(int argc, char* argv[])
     glwindow.setVertexAttribPtr(1,3,6 * sizeof(GLfloat), 3 * sizeof(GLfloat));
     //TODO=>These lines cause program to crash with sigtrap brakepoint
 
-    // glwindow.unbindVAO(0);
-    //
-    //
-    // glwindow.createShaders();
-    // glwindow.compileShaders();
-    //
-    // glwindow.creatProgram();
-    //
-    // glwindow.createVAO();
-    // glwindow.createVBO(myNorms1.vertexByteSize, myNorms1.vertexData);
-    // glwindow.createEBO(myNorms1.indexByteSize, myNorms1.indexData);
-    //
-    // glwindow.setVertexAttribPtr(0,3,6 * sizeof(GLfloat), 0);
-    // // glwindow.setVertexAttribPtr(1,3,6 * sizeof(GLfloat), 3 * sizeof(GLfloat));
-    //
-    // glwindow.unbindVAO(1);
+    glwindow.unbindVAO(0);
 
+    glwindow.createVAO();
+    glwindow.createVBO(myNorms1.vertexByteSize, myNorms1.vertexData);
+    glwindow.createEBO(myNorms1.indexByteSize, myNorms1.indexData);
+
+    glwindow.setVertexAttribPtr(0,3,6 * sizeof(GLfloat), 0);
+    // glwindow.setVertexAttribPtr(1,3,6 * sizeof(GLfloat), 3 * sizeof(GLfloat));
+
+    glwindow.unbindVAO(1);
+
+
+    glwindow.createShaders();
+    glwindow.compileShaders();
+
+    glwindow.creatProgram();
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    // glCullFace(GL_FRONT);
 
     while(!glfwWindowShouldClose(myWindow)) {
         int width, height;
@@ -82,14 +83,17 @@ int main(int argc, char* argv[])
 
         glViewport(0,0, width, height);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
 	    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 
+        glCullFace(GL_BACK);
         // glDrawArrays(GL_TRIANGLES, 0, 3);
         glwindow.getPollingUpdate();
-        // glwindow.bindVAO(0);
         glwindow.sendFullMatrix(width, height);
+        glwindow.bindVAO(0);
         glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
+        glwindow.bindVAO(1);
+        // glDrawElements(GL_LINES, myNorms1.numIndices, GL_UNSIGNED_INT, (void*)0);
+        glDrawArrays(GL_LINES, 0, 16);
 
         glfwSwapBuffers(myWindow);
         //absolutely necessary otherwise you get unclosable transparent window that hogs resources

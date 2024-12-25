@@ -153,7 +153,7 @@ mat4 GLWindow::sendFullMatrix(int width, int height) {
 
     //model (to world) => should it be done here? this is completed when placing models into the world
     mat4 translateMat = glm::translate(mat4(1.0f),vec3(0.0f,0.0f,-5.0f));
-    mat4 rotateMat = glm::rotate(mat4(1.0f),glm::radians(30.0f),vec3(1.0f,0.0f,0.0f));
+    mat4 rotateMat = glm::rotate(mat4(1.0f),glm::radians(0.0f),vec3(1.0f,0.0f,0.0f));
 
     //TODO:view (to view) => need camera class
 
@@ -181,12 +181,12 @@ void GLWindow::handleKeyCallback(GLFWwindow* window, int key, int scancode, int 
         return;
     }
     //pollKeyMovement: .x = strafe, .y = lookat, .z = UP
-    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) pollKeyMovement += 0.1f * vec3(1.0f,0.0f,0.0f);
-    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) pollKeyMovement -= 0.1f * vec3(1.0f,0.0f,0.0f);
-    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) pollKeyMovement += 0.1f * vec3(0.0f,1.0f,0.0f);
-    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) pollKeyMovement -= 0.1f * vec3(0.0f,1.0f,0.0f);
-    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) pollKeyMovement += 0.1f * vec3(0.0f,0.0f,1.0f);
-    if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) pollKeyMovement -= 0.1f * vec3(1.0f,0.0f,1.0f);
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) pollKeyMovement += 0.3f * vec3(1.0f,0.0f,0.0f);
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) pollKeyMovement -= 0.3f * vec3(1.0f,0.0f,0.0f);
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) pollKeyMovement += 0.3f * vec3(0.0f,1.0f,0.0f);
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) pollKeyMovement -= 0.3f * vec3(0.0f,1.0f,0.0f);
+    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) pollKeyMovement += 0.3f * vec3(0.0f,0.0f,1.0f);
+    if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) pollKeyMovement -= 0.3f * vec3(0.0f,0.0f,1.0f);
     pollKey = key;
     pollUpdate |= keyUpdate;
 }
