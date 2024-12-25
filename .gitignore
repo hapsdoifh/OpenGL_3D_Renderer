@@ -6,6 +6,8 @@ cmake-build-debug-event-trace/
 
 Dependencies/
 
+CMakeLists.txt
+
 *.dll
 
 *.lib

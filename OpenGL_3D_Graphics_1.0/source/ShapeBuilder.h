@@ -6,6 +6,7 @@
 #define SHAPEBUILDER_H
 #include <glm/glm.hpp>
 #include <glad/glad.h>
+#include <iostream>
 #include <vector>
 
 struct Vertex {

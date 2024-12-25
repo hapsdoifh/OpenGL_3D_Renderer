@@ -54,23 +54,24 @@ int main(int argc, char* argv[])
 
     glwindow.setVertexAttribPtr(0,3,6 * sizeof(GLfloat), 0);
     glwindow.setVertexAttribPtr(1,3,6 * sizeof(GLfloat), 3 * sizeof(GLfloat));
+    //TODO=>These lines cause program to crash with sigtrap brakepoint
 
-    glwindow.unbindVAO(0);
-
-
-    glwindow.createShaders();
-    glwindow.compileShaders();
-
-    glwindow.creatProgram();
-
-    glwindow.createVAO();
-    glwindow.createVBO(myNorms1.vertexByteSize, myNorms1.vertexData);
-    glwindow.createEBO(myNorms1.indexByteSize, myNorms1.indexData);
-
-    glwindow.setVertexAttribPtr(0,3,6 * sizeof(GLfloat), 0);
-    // glwindow.setVertexAttribPtr(1,3,6 * sizeof(GLfloat), 3 * sizeof(GLfloat));
-
-    glwindow.unbindVAO(1);
+    // glwindow.unbindVAO(0);
+    //
+    //
+    // glwindow.createShaders();
+    // glwindow.compileShaders();
+    //
+    // glwindow.creatProgram();
+    //
+    // glwindow.createVAO();
+    // glwindow.createVBO(myNorms1.vertexByteSize, myNorms1.vertexData);
+    // glwindow.createEBO(myNorms1.indexByteSize, myNorms1.indexData);
+    //
+    // glwindow.setVertexAttribPtr(0,3,6 * sizeof(GLfloat), 0);
+    // // glwindow.setVertexAttribPtr(1,3,6 * sizeof(GLfloat), 3 * sizeof(GLfloat));
+    //
+    // glwindow.unbindVAO(1);
 
     glEnable(GL_DEPTH_TEST);
 
