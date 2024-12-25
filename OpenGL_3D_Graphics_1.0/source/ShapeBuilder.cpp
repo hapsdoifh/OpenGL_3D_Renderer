@@ -3,7 +3,7 @@
 //
 
 #include "ShapeBuilder.h"
-#include <iostream>
+// #include <iostream>
 
 //dynamically allocated memory, need to be deleted
 //TODO: make the memory cleanup local to this class
@@ -32,7 +32,6 @@
 // }
 
 void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
-    vertexData = new Vertex[numVertices];
 
     // for(int i{0}; i<8; i++) {
     //     vertexData[i] = vertexData[0];
@@ -86,6 +85,7 @@ void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
 
     //copy vertex data
     numVertices = sizeof(cubeVerts)/sizeof(cubeVerts[0]);
+    vertexData = new Vertex[numVertices];
     vertexByteSize = sizeof(cubeVerts);
     //TODO: use alternative copy method?
     memcpy(vertexData, cubeVerts, vertexByteSize);
@@ -108,7 +108,7 @@ void ShapeBuilder::buildNormals(ShapeBuilder &srcShape) {
         vertexData[normVertCnt + 1].position = srcShape.vertexData[i].position + srcShape.vertexData[i].normal;
         normVertCnt += 2;
     }
-    indexData = new GLuint[numVertices];
+    indexData = new GLuint[numIndices];
     for(int i{0}; i < sizeof(indexData); i++)
         indexData[i] = i;
 }
@@ -118,7 +118,6 @@ ShapeBuilder::ShapeBuilder() {
 }
 
 ShapeBuilder::~ShapeBuilder() {
-    delete[] vertexData;
-    delete[] indexData;
+    // delete[] vertexData;
+    // delete[] indexData;
 }
-

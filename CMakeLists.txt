@@ -30,5 +30,5 @@ add_executable(OpenGL_3D_Renderer
     OpenGL_3D_Graphics_1.0/source/Camera.cpp
     OpenGL_3D_Graphics_1.0/source/Camera.h)
 
-#target_link_libraries(OpenGL_3D_Renderer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/OpenGL_3D_Graphics_1.0/Dependencies/GLFW/libglfw.3.dylib)
-target_link_libraries(OpenGL_3D_Renderer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/OpenGL_3D_Graphics_1.0/Dependencies/GLFW/glfw3dll.lib)
+target_link_libraries(OpenGL_3D_Renderer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/OpenGL_3D_Graphics_1.0/Dependencies/GLFW/libglfw.3.dylib)
+#target_lsink_libraries(OpenGL_3D_Renderer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/OpenGL_3D_Graphics_1.0/Dependencies/GLFW/glfw3dll.lib)
