@@ -157,14 +157,8 @@ mat4 GLWindow::generateMovementMat(vec3 position, vec3 rotation) {
 }
 
 
-void GLWindow::sendFullMatrix(int width, int height, mat4 modelWorldMat, GLfloat FOV) {
+void GLWindow::sendUniformComponents(int width, int height, mat4 modelWorldMat, GLfloat FOV) {
     //glm transformations follow normal conventions, eg: translate(A,B) = A*B
-
-    //model (to world) => should it be done here? this is completed when placing models into the world
-    // mat4 translateMat = glm::translate(mat4(1.0f),vec3(0.0f,0.0f,-5.0f));
-    // mat4 rotateMat = glm::rotate(mat4(1.0f),glm::radians(0.0f),vec3(1.0f,0.0f,0.0f));
-
-    //TODO:view (to view) => need camera class
 
     //projection (to projection)
     mat4 projMat = glm::perspective(glm::radians(FOV), (float)width/height, 0.1f, 100.0f);
@@ -180,6 +174,10 @@ void GLWindow::sendFullMatrix(int width, int height, mat4 modelWorldMat, GLfloat
     GLint lightPosLoc = glGetUniformLocation(programID, "lightPos");
     vec3 lightPos(0.0f,6.0f,0.0f);
     glUniform3fv(lightPosLoc, 1, &lightPos[0]);
+
+    GLint ambientLoc = glGetUniformLocation(programID, "ambient");
+    vec3 ambient(0.2f,0.2f,0.2f);
+    glUniform3fv(ambientLoc, 1, &ambient[0]);
 }
 
 void GLWindow::handleKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -187,13 +185,17 @@ void GLWindow::handleKeyCallback(GLFWwindow* window, int key, int scancode, int 
         glfwSetWindowShouldClose(window, GLFW_TRUE);
         return;
     }
-    //pollKeyMovement: .x = strafe, .y = lookat, .z = UP
-    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) pollKeyMovement += 0.3f * vec3(1.0f,0.0f,0.0f);
-    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) pollKeyMovement -= 0.3f * vec3(1.0f,0.0f,0.0f);
-    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) pollKeyMovement += 0.3f * vec3(0.0f,1.0f,0.0f);
-    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) pollKeyMovement -= 0.3f * vec3(0.0f,1.0f,0.0f);
-    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) pollKeyMovement += 0.3f * vec3(0.0f,0.0f,1.0f);
-    if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) pollKeyMovement -= 0.3f * vec3(0.0f,0.0f,1.0f);
+    //pollKeyMovement: .x = strafe, .y = lookat, .z = UP]
+    GLint keyCodes[] = {GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_SPACE, GLFW_KEY_Z};
+    vec3 keyActions[] = {vec3(1.0f,0.0f,0.0f), vec3(-1.0f,0.0f,0.0f), vec3(0.0f,1.0f,0.0f),
+        vec3(0.0f,-1.0f,0.0f), vec3(0.0f,0.0f,1.0f), vec3(0.0f,0.0f,-1.0f)};
+
+    for(int i{0}; i < (sizeof(keyCodes)/sizeof(GLuint)); i++) {
+        GLint keyStatus = glfwGetKey(window, keyCodes[i]);
+        if(keyStatus == GLFW_PRESS || keyStatus == GLFW_REPEAT)
+            pollKeyMovement += 0.3f * keyActions[i];
+    }
+
     pollKey = key;
     pollUpdate |= keyUpdate;
 }
@@ -223,5 +225,6 @@ void GLWindow::getPollingUpdate() {
 }
 
 void GLWindow::cleanUP() {
+    //TODO: implement cleanup
     return;
 }

@@ -52,8 +52,9 @@ int main(int argc, char* argv[])
     glwindow.createVBO(myCube1.vertexByteSize, myCube1.vertexData);
     glwindow.createEBO(myCube1.indexByteSize, myCube1.indexData);
 
-    glwindow.setVertexAttribPtr(0,3,6 * sizeof(GLfloat), 0);
-    glwindow.setVertexAttribPtr(1,3,6 * sizeof(GLfloat), 3 * sizeof(GLfloat));
+    glwindow.setVertexAttribPtr(0,3,9 * sizeof(GLfloat), 0);
+    glwindow.setVertexAttribPtr(1,3,9 * sizeof(GLfloat), 3 * sizeof(GLfloat));
+    glwindow.setVertexAttribPtr(2,3,9 * sizeof(GLfloat), 6 * sizeof(GLfloat));
     //TODO=>These lines cause program to crash with sigtrap brakepoint
 
     glwindow.unbindVAO(0);
@@ -62,7 +63,7 @@ int main(int argc, char* argv[])
     glwindow.createVBO(myNorms1.vertexByteSize, myNorms1.vertexData);
     glwindow.createEBO(myNorms1.indexByteSize, myNorms1.indexData);
 
-    glwindow.setVertexAttribPtr(0,3,6 * sizeof(GLfloat), 0);
+    glwindow.setVertexAttribPtr(0,3,9 * sizeof(GLfloat), 0);
     // glwindow.setVertexAttribPtr(1,3,6 * sizeof(GLfloat), 3 * sizeof(GLfloat));
 
     glwindow.unbindVAO(1);
@@ -90,7 +91,7 @@ int main(int argc, char* argv[])
         glwindow.getPollingUpdate();
 
         mat4 modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f,0.0f,30.0f));
-        glwindow.sendFullMatrix(width, height, modWorldMat);
+        glwindow.sendUniformComponents(width, height, modWorldMat);
         glwindow.bindVAO(0);
         glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
         glwindow.bindVAO(1);
@@ -102,7 +103,7 @@ int main(int argc, char* argv[])
         glfwPollEvents();
     }
     //
-    // myCube1.cleanUP();
+    myCube1.cleanUP();
     myNorms1.cleanUP();
 
     glfwDestroyWindow(myWindow);

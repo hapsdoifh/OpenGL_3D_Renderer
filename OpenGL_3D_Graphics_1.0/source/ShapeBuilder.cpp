@@ -5,56 +5,21 @@
 #include "ShapeBuilder.h"
 // #include <iostream>
 
-//dynamically allocated memory, need to be deleted
-//TODO: make the memory cleanup local to this class
-// void ShapeBuilder::buildCube() {
-//     Vertex cubeVerts[] {
-//         glm::vec3(-1.0f, 1.0f, 0.0f),
-//         glm::vec3(1.0f, 1.0f, 0.0f),
-//         glm::vec3(-1.0f, -1.0f, 0.0f),
-//         glm::vec3(1.0f, -1.0f, 0.0f)
-//     };
-//     numVertices = sizeof(cubeVerts)/sizeof(cubeVerts[0]);
-//     vertexData = new Vertex[numVertices];
-//     vertexByteSize = sizeof(cubeVerts);
-//     //TODO: use alternative copy method?
-//     memcpy(vertexData, cubeVerts, vertexByteSize);
-//
-//     GLuint cubeInds[] {
-//         0,1,2,
-//         2,1,3
-//     };
-//
-//     numIndices = sizeof(cubeInds)/sizeof(cubeInds[0]);
-//     indexData = new GLuint[numIndices];
-//     indexByteSize = sizeof(cubeInds);
-//     memcpy(indexData, cubeInds, indexByteSize);
-// }
-
 void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
 
-    // for(int i{0}; i<8; i++) {
-    //     vertexData[i] = vertexData[0];
-    // }
-
-    //This is still a right handed coordinate system so 1 will be closer than -1 once loaded in (in -z no rotation)
+    //This is still a right-handed coordinate system so 1 will be closer than -1 once loaded in (in -z no rotation)
     Vertex cubeVerts[] {
-        sideLengthScale * glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(-1.0f, -1.0f,1.0f), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, 1.0f, 1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, -1.0f,1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, -1.0f, 1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
 
-        sideLengthScale * glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(1.0f, 1.0f, -1.0f), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(0.0,0.0,0.0)
+        sideLengthScale * glm::vec3(-1.0f, 1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, 1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, -1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, -1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0)
     };
 
-    // GLuint cubeInds[] {
-    //     0,1,2,
-    //     2,1,3,
-    //
-    // };
 
     GLuint cubeInds[]{
         0,2,1, 1,2,3,
