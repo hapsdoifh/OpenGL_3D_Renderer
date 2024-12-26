@@ -32,25 +32,6 @@ void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
         0,4,2, 4,6,2,
         1,7,5, 1,3,7,
     };
-    //calculate vertex normals:
-    std::vector<glm::vec3>faceNormals;
-    for(GLuint faceIt{0}; faceIt < sizeof(cubeInds)/sizeof(GLuint); faceIt += 3) {
-        glm::vec3 edgeVecA, edgeVecB;
-        GLuint currVertex = cubeInds[faceIt];
-        GLuint currVertexA = cubeInds[faceIt+1];
-        GLuint currVertexB = cubeInds[faceIt+2];
-        edgeVecA = cubeVerts[currVertexA].position - cubeVerts[currVertex].position;
-        edgeVecB = cubeVerts[currVertexB].position - cubeVerts[currVertexA].position;
-        glm::vec3 faceNormal = glm::normalize(glm::cross(edgeVecA, edgeVecB)); // weight each face equally, is optional
-
-        cubeVerts[currVertex].normal += faceNormal;
-        cubeVerts[currVertexA].normal += faceNormal;
-        cubeVerts[currVertexB].normal += faceNormal;
-    }
-
-    for(Vertex &vertIt : cubeVerts) {
-        vertIt.normal = glm::normalize(vertIt.normal);
-    }
 
     //copy vertex data
     numVertices = sizeof(cubeVerts)/sizeof(cubeVerts[0]);
@@ -64,6 +45,7 @@ void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
     indexData = new GLuint[numIndices];
     indexByteSize = sizeof(cubeInds);
     memcpy(indexData, cubeInds, indexByteSize);
+    calcVertexNorm();
 }
 
 void ShapeBuilder::buildNormals(ShapeBuilder &srcShape) {
@@ -123,6 +105,8 @@ void ShapeBuilder::importShape(std::string path) {
     std::string fileLine;
     while(std::getline(shapeFile, fileLine)) {
         std::vector<std::string> fileList = splitFileLine(fileLine);
+        if(fileList.empty())
+            continue;
         if(fileList[0] == "v" ) {
             vertexList.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
         }else if(fileList[0] == "vn") {
@@ -130,6 +114,7 @@ void ShapeBuilder::importShape(std::string path) {
         }else if(fileList[0] == "f") {
             faceList.push_back(fileList);
         }
+        //std::cout << faceList.size() << std::endl;
     }
 
     for(auto& it : faceList) {
@@ -140,12 +125,17 @@ void ShapeBuilder::importShape(std::string path) {
             //from what I understand the face portion of .obj files specifies the vertex as well as the vertex normals it wants to use for a face
             //however in OpenGL every normal is tied with every vertex, meaning if I want different vertex normals I need to create whole different vertices
             //this makes the indexing useless as I have to use every vertex I created anyway. I'm just adding it to keep the style consistent
+            //size 6,8 => no texture eg: v/vn | size 9,12 => has texture eg: v/vt/vn (very basic checking)
             Vertex tempVert;
-            int vertInd = std::stoi(it[i*3 + 1]);
+            int stride = 3;
+            if((it.size() - 1) == 6 || (it.size() - 1) == 8) //minus the first symbol
+                stride = 2;
+            int vertInd = std::stoi(it[i*stride + 1]);
             //TODO process texture fileList[i+1]
-            int normInd = std::stoi(it[i*3 + 3]);
+            int normInd = std::stoi(it[i*stride + stride]);
             tempVert.position = vertexList[vertInd - 1];
-            tempVert.normal = normalList[normInd - 1];
+            if(!normalList.empty())
+                tempVert.normal = normalList[normInd - 1];
 
             tempVert.color = vec3(0.0,0.0,1.0f);
             tempVertList.push_back(tempVert);
@@ -165,6 +155,32 @@ void ShapeBuilder::importShape(std::string path) {
     for(int i{0}; i < numIndices; i++) {
         indexData[i] = i; //just filler to keep the consistent glDrawElement method
     }
+    //manually calculate vertex norm because it's not given in the file
+    if(normalList.empty()) {
+        calcVertexNorm();
+    }
+}
+
+void ShapeBuilder::calcVertexNorm() {
+    //cycle through all the faces and calculate face normals, add normal to contributing to vertices of that face
+    for(GLuint faceIt{0}; faceIt < numIndices; faceIt += 3) {
+        glm::vec3 edgeVecA, edgeVecB;
+        GLuint currVertex = indexData[faceIt];
+        GLuint currVertexA = indexData[faceIt+1];
+        GLuint currVertexB = indexData[faceIt+2];
+        edgeVecA = vertexData[currVertexA].position - vertexData[currVertex].position;
+        edgeVecB = vertexData[currVertexB].position - vertexData[currVertexA].position;
+        glm::vec3 faceNormal = glm::normalize(glm::cross(edgeVecA, edgeVecB)); // weight each face equally, is optional
+
+        vertexData[currVertex].normal += faceNormal;
+        vertexData[currVertexA].normal += faceNormal;
+        vertexData[currVertexB].normal += faceNormal;
+    }
+
+    for(int i{0}; i < numVertices; i++) {
+        vertexData[i].normal = glm::normalize(vertexData[i].normal);
+    }
+
 }
 
 ShapeBuilder::ShapeBuilder():

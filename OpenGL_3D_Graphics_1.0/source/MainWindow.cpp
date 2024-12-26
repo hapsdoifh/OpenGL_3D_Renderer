@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
     myNorms1.buildNormals(myCube1);
 
     ShapeBuilder myImport1;
-    myImport1.importShape("Datsun_280Z.obj");
+    myImport1.importShape("180212_Erik_XIV_Rustning_2.obj");
 
     ShapeBuilder myNorms2;
     myNorms2.buildNormals(myImport1);
@@ -117,14 +117,14 @@ int main(int argc, char* argv[])
         glwindow.bindVAO(1);
         glDrawArrays(GL_LINES, 0, myNorms1.numVertices);
 
-        modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 0.0f, -10.0f), glm::vec3(0.0f,20.0f,0.0f));
+        modWorldMat = glwindow.generateMovementMat(vec3(0.0f, -10.0f, -10.0f), glm::vec3(-90.0f,180.0f,0.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat);
         glwindow.bindVAO(2);
-        // glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
-        glDrawArrays(GL_TRIANGLES, 0, myImport1.numVertices);
+        glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
+        // glDrawArrays(GL_TRIANGLES, 0, myImport1.numVertices);
 
         glwindow.bindVAO(3);
-        // glDrawArrays(GL_LINES, 0, myNorms2.numVertices);
+        glDrawArrays(GL_LINES, 0, myNorms2.numVertices);
 
 
         glfwSwapBuffers(myWindow);

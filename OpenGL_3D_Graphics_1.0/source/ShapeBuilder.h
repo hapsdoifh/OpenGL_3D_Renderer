@@ -41,6 +41,7 @@ public:
     void buildNormals(ShapeBuilder& srcShape);
     std::vector<std::string> splitFileLine(std::string fileLine);
     void importShape(std::string path); //FUTURE TODO
+    void calcVertexNorm();
     void cleanUP();
 };
 
