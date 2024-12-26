@@ -129,9 +129,9 @@ void ShapeBuilder::importShape(std::string path) {
                 //however in OpenGL every normal is tied with every vertex, meaning if I want different vertex normals I need to create whole different vertices
                 //this makes the indexing useless as I have to use every vertex I created anyway. I'm just adding it to keep the style consistent
                 Vertex tempVert;
-                tempVert.position = vertexList[std::stoi(fileList[i])];
+                tempVert.position = vertexList[std::stoi(fileList[i]) - 1];
                 //TODO process texture fileList[i+1]
-                tempVert.normal = vertexList[std::stoi(fileList[i+2])];
+                tempVert.normal = vertexList[std::stoi(fileList[i+2]) - 1];
                 tempVert.color = vec3(0.0,0.0,1.0f);
                 tempVertList.push_back(tempVert);
             }
@@ -153,7 +153,10 @@ void ShapeBuilder::importShape(std::string path) {
     }
 }
 
-ShapeBuilder::ShapeBuilder() {
+ShapeBuilder::ShapeBuilder():
+vertexData(nullptr),
+indexData(nullptr)
+{
 
 }
 

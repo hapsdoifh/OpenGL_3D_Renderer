@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 
     glwindow.creatProgram();
     glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     // glCullFace(GL_FRONT);
 
     while(!glfwWindowShouldClose(myWindow)) {
@@ -117,6 +117,7 @@ int main(int argc, char* argv[])
     //
     myCube1.cleanUP();
     myNorms1.cleanUP();
+    myImport1.cleanUP();
 
     glfwDestroyWindow(myWindow);
     glfwTerminate();
