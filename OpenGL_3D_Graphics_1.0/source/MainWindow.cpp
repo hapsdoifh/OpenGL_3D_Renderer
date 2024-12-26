@@ -46,6 +46,9 @@ int main(int argc, char* argv[])
     ShapeBuilder myImport1;
     myImport1.importShape("Datsun_280Z.obj");
 
+    ShapeBuilder myNorms2;
+    myNorms2.buildNormals(myImport1);
+
     glwindow.createShaders();
     glwindow.compileShaders();
 
@@ -76,6 +79,15 @@ int main(int argc, char* argv[])
     glwindow.setVertexAttribPtr(2,3,9*sizeof(GLfloat), 6 * sizeof(GLfloat));
     glwindow.unbindVAO(2);
 
+
+    //Normals
+    glwindow.createVAO();
+    glwindow.createVBO(myNorms2.vertexByteSize, myNorms2.vertexData);
+    glwindow.createEBO(myNorms2.indexByteSize, myNorms2.indexData);
+    glwindow.setVertexAttribPtr(0,3,9 * sizeof(GLfloat), 0);
+    glwindow.unbindVAO(3);
+
+
     glwindow.createShaders();
     glwindow.compileShaders();
 
@@ -103,13 +115,16 @@ int main(int argc, char* argv[])
         glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
         glwindow.bindVAO(1);
-        glDrawArrays(GL_LINES, 0, 16);
+        glDrawArrays(GL_LINES, 0, myNorms1.numVertices);
 
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 0.0f, -10.0f), glm::vec3(0.0f,20.0f,0.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat);
         glwindow.bindVAO(2);
         // glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
         glDrawArrays(GL_TRIANGLES, 0, myImport1.numVertices);
+
+        glwindow.bindVAO(3);
+        // glDrawArrays(GL_LINES, 0, myNorms2.numVertices);
 
 
         glfwSwapBuffers(myWindow);

@@ -3,6 +3,8 @@
 //
 
 #include "ShapeBuilder.h"
+
+#include <complex>
 #include <regex>
 #include <unistd.h>
 
@@ -129,6 +131,7 @@ void ShapeBuilder::importShape(std::string path) {
             faceList.push_back(fileList);
         }
     }
+
     for(auto& it : faceList) {
         std::vector<int> vertOrder = {0,1,2,0,2,3};
         if(it.size() <= 10)
@@ -142,7 +145,7 @@ void ShapeBuilder::importShape(std::string path) {
             //TODO process texture fileList[i+1]
             int normInd = std::stoi(it[i*3 + 3]);
             tempVert.position = vertexList[vertInd - 1];
-            tempVert.normal = vertexList[normInd - 1];
+            tempVert.normal = normalList[normInd - 1];
 
             tempVert.color = vec3(0.0,0.0,1.0f);
             tempVertList.push_back(tempVert);
