@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
     myNorms1.buildNormals(myCube1);
 
     ShapeBuilder myImport1;
-    myImport1.importShape("truck.obj");
+    myImport1.importShape("Datsun_280Z.obj");
 
     glwindow.createShaders();
     glwindow.compileShaders();
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 
     glwindow.creatProgram();
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    // glEnable(GL_CULL_FACE);
     // glCullFace(GL_FRONT);
 
     while(!glfwWindowShouldClose(myWindow)) {

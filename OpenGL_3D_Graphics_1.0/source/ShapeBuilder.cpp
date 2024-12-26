@@ -130,14 +130,20 @@ void ShapeBuilder::importShape(std::string path) {
         }
     }
     for(auto& it : faceList) {
-        for(int i{1}; i < it.size(); i+=3) {
+        std::vector<int> vertOrder = {0,1,2,0,2,3};
+        if(it.size() <= 10)
+            vertOrder = std::vector<int>(vertOrder.begin(), vertOrder.begin()+3);
+        for(auto& i : vertOrder) {
             //from what I understand the face portion of .obj files specifies the vertex as well as the vertex normals it wants to use for a face
             //however in OpenGL every normal is tied with every vertex, meaning if I want different vertex normals I need to create whole different vertices
             //this makes the indexing useless as I have to use every vertex I created anyway. I'm just adding it to keep the style consistent
             Vertex tempVert;
-            tempVert.position = vertexList[std::stoi(it[i]) - 1];
+            int vertInd = std::stoi(it[i*3 + 1]);
             //TODO process texture fileList[i+1]
-            tempVert.normal = vertexList[std::stoi(it[i+2]) - 1];
+            int normInd = std::stoi(it[i*3 + 3]);
+            tempVert.position = vertexList[vertInd - 1];
+            tempVert.normal = vertexList[normInd - 1];
+
             tempVert.color = vec3(0.0,0.0,1.0f);
             tempVertList.push_back(tempVert);
         }
