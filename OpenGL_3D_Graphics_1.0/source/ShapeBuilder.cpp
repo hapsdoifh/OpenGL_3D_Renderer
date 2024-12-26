@@ -4,6 +4,7 @@
 
 #include "ShapeBuilder.h"
 #include <regex>
+#include <unistd.h>
 
 void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
 
@@ -88,11 +89,13 @@ void ShapeBuilder::cleanUP() {
 
 std::vector<std::string> ShapeBuilder::splitFileLine(std::string fileLine) {
     std::vector<std::string> fileList;
-    std::string processedList = std::regex_replace(fileLine, std::regex("/"), " ");
-    while(processedList.find(" ") != std::string::npos) {
-        fileList.push_back(processedList.substr(0, processedList.find(" ")));
-        fileLine.erase(fileLine.begin(), fileLine.begin() + fileLine.find(" ") + 1);
+    std::string processedLine = std::regex_replace(fileLine, std::regex("/"), " ");
+    while(processedLine.find(" ") != std::string::npos) {
+        fileList.push_back(processedLine.substr(0, processedLine.find(" ")));
+        processedLine.erase(processedLine.begin(), processedLine.begin() + processedLine.find(" ") + 1);
     }
+    if(!processedLine.empty())
+        fileList.push_back(processedLine.substr(0,processedLine.size()));
     return fileList;
 }
 
@@ -101,7 +104,14 @@ void ShapeBuilder::importShape(std::string path) {
     std::vector<glm::vec3> normalList;
     std::vector<Vertex> tempVertList;
     std::vector<GLuint> tempIndList;
-    std::ifstream shapeFile(path, std::ios::in);
+
+    char cwd[100];
+    if(getcwd(cwd, 100) != nullptr)
+        std::cout << cwd << std::endl;
+
+    std::string curPath = cwd;
+    std::string relative_path = curPath + "/../OpenGL_3D_Graphics_1.0/source/" + path;
+    std::ifstream shapeFile(relative_path, std::ios::in);
     if(!shapeFile.is_open()) {
         std::cout << "Cannot open shape file, exitting";
         exit(0);
@@ -122,6 +132,7 @@ void ShapeBuilder::importShape(std::string path) {
                 tempVert.position = vertexList[std::stoi(fileList[i])];
                 //TODO process texture fileList[i+1]
                 tempVert.normal = vertexList[std::stoi(fileList[i+2])];
+                tempVert.color = vec3(0.0,0.0,1.0f);
                 tempVertList.push_back(tempVert);
             }
         }
@@ -135,6 +146,7 @@ void ShapeBuilder::importShape(std::string path) {
     memcpy(vertexData, &tempVertList[0], tempVertList.size() * sizeof(Vertex));
 
     numIndices = numVertices;
+    indexByteSize = numIndices * sizeof(GLuint);
     indexData = new GLuint[numIndices];
     for(int i{0}; i < numIndices; i++) {
         indexData[i] = i; //just filler to keep the consistent glDrawElement method

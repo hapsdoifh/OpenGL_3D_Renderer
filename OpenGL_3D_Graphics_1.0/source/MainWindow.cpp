@@ -43,38 +43,45 @@ int main(int argc, char* argv[])
     ShapeBuilder myNorms1;
     myNorms1.buildNormals(myCube1);
 
+    ShapeBuilder myImport1;
+    myImport1.importShape("cube.obj");
+
     glwindow.createShaders();
     glwindow.compileShaders();
 
     glwindow.creatProgram();
 
+    //Cube1
     glwindow.createVAO();
     glwindow.createVBO(myCube1.vertexByteSize, myCube1.vertexData);
     glwindow.createEBO(myCube1.indexByteSize, myCube1.indexData);
-
     glwindow.setVertexAttribPtr(0,3,9 * sizeof(GLfloat), 0);
     glwindow.setVertexAttribPtr(1,3,9 * sizeof(GLfloat), 3 * sizeof(GLfloat));
     glwindow.setVertexAttribPtr(2,3,9 * sizeof(GLfloat), 6 * sizeof(GLfloat));
-    //TODO=>These lines cause program to crash with sigtrap brakepoint
-
     glwindow.unbindVAO(0);
 
+    //Normals
     glwindow.createVAO();
     glwindow.createVBO(myNorms1.vertexByteSize, myNorms1.vertexData);
     glwindow.createEBO(myNorms1.indexByteSize, myNorms1.indexData);
-
     glwindow.setVertexAttribPtr(0,3,9 * sizeof(GLfloat), 0);
-    // glwindow.setVertexAttribPtr(1,3,6 * sizeof(GLfloat), 3 * sizeof(GLfloat));
-
     glwindow.unbindVAO(1);
 
+    //ImportCube
+    glwindow.createVAO();
+    glwindow.createVBO(myImport1.vertexByteSize, myImport1.vertexData);
+    glwindow.createEBO(myImport1.indexByteSize, myImport1.indexData);
+    glwindow.setVertexAttribPtr(0,3,9*sizeof(GLfloat), 0);
+    glwindow.setVertexAttribPtr(1,3,9*sizeof(GLfloat), 3 * sizeof(GLfloat));
+    glwindow.setVertexAttribPtr(2,3,9*sizeof(GLfloat), 6 * sizeof(GLfloat));
+    glwindow.unbindVAO(2);
 
     glwindow.createShaders();
     glwindow.compileShaders();
 
     glwindow.creatProgram();
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    // glEnable(GL_CULL_FACE);
     // glCullFace(GL_FRONT);
 
     while(!glfwWindowShouldClose(myWindow)) {
@@ -86,7 +93,7 @@ int main(int argc, char* argv[])
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 
-        glCullFace(GL_BACK);
+        // glCullFace(GL_BACK);
         // glDrawArrays(GL_TRIANGLES, 0, 3);
         glwindow.getPollingUpdate();
 
@@ -94,9 +101,14 @@ int main(int argc, char* argv[])
         glwindow.sendUniformComponents(width, height, modWorldMat);
         glwindow.bindVAO(0);
         glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
+
         glwindow.bindVAO(1);
-        // glDrawElements(GL_LINES, myNorms1.numIndices, GL_UNSIGNED_INT, (void*)0);
         glDrawArrays(GL_LINES, 0, 16);
+
+        modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 0.0f, -10.0f), glm::vec3(0.0f,20.0f,0.0f));
+        glwindow.sendUniformComponents(width, height, modWorldMat);
+        glwindow.bindVAO(2);
+        glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
         glfwSwapBuffers(myWindow);
         //absolutely necessary otherwise you get unclosable transparent window that hogs resources
