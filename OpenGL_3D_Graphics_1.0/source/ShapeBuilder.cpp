@@ -3,7 +3,7 @@
 //
 
 #include "ShapeBuilder.h"
-// #include <iostream>
+#include <regex>
 
 void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
 
@@ -84,6 +84,61 @@ void ShapeBuilder::cleanUP() {
     vertexData = nullptr;
     delete[] indexData;
     indexData = nullptr;
+}
+
+std::vector<std::string> ShapeBuilder::splitFileLine(std::string fileLine) {
+    std::vector<std::string> fileList;
+    std::string processedList = std::regex_replace(fileLine, std::regex("/"), " ");
+    while(processedList.find(" ") != std::string::npos) {
+        fileList.push_back(processedList.substr(0, processedList.find(" ")));
+        fileLine.erase(fileLine.begin(), fileLine.begin() + fileLine.find(" ") + 1);
+    }
+    return fileList;
+}
+
+void ShapeBuilder::importShape(std::string path) {
+    std::vector<glm::vec3> vertexList;
+    std::vector<glm::vec3> normalList;
+    std::vector<Vertex> tempVertList;
+    std::vector<GLuint> tempIndList;
+    std::ifstream shapeFile(path, std::ios::in);
+    if(!shapeFile.is_open()) {
+        std::cout << "Cannot open shape file, exitting";
+        exit(0);
+    }
+    std::string fileLine;
+    while(std::getline(shapeFile, fileLine)) {
+        std::vector<std::string> fileList = splitFileLine(fileLine);
+        if(fileList[0] == "v" ) {
+            vertexList.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
+        }else if(fileList[0] == "vn") {
+            normalList.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
+        }else if(fileList[0] == "f") {
+            for(int i{1}; i < fileList.size(); i+=3) {
+                //from what I understand the face portion of .obj files specifies the vertex as well as the vertex normals it wants to use for a face
+                //however in OpenGL every normal is tied with every vertex, meaning if I want different vertex normals I need to create whole different vertices
+                //this makes the indexing useless as I have to use every vertex I created anyway. I'm just adding it to keep the style consistent
+                Vertex tempVert;
+                tempVert.position = vertexList[std::stoi(fileList[i])];
+                //TODO process texture fileList[i+1]
+                tempVert.normal = vertexList[std::stoi(fileList[i+2])];
+                tempVertList.push_back(tempVert);
+            }
+        }
+    }
+    delete[] vertexData;
+    delete[] indexData; //just to be safe
+
+    numVertices = tempVertList.size();
+    vertexByteSize = numVertices * sizeof(Vertex);
+    vertexData = new Vertex[tempVertList.size()];
+    memcpy(vertexData, &tempVertList[0], tempVertList.size() * sizeof(Vertex));
+
+    numIndices = numVertices;
+    indexData = new GLuint[numIndices];
+    for(int i{0}; i < numIndices; i++) {
+        indexData[i] = i; //just filler to keep the consistent glDrawElement method
+    }
 }
 
 ShapeBuilder::ShapeBuilder() {
