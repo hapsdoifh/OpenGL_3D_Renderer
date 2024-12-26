@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
     myNorms1.buildNormals(myCube1);
 
     ShapeBuilder myImport1;
-    myImport1.importShape("cube.obj");
+    myImport1.importShape("truck.obj");
 
     glwindow.createShaders();
     glwindow.compileShaders();
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 
         glViewport(0,0, width, height);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-	    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+	    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 
         // glCullFace(GL_BACK);
         // glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -108,7 +108,9 @@ int main(int argc, char* argv[])
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 0.0f, -10.0f), glm::vec3(0.0f,20.0f,0.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat);
         glwindow.bindVAO(2);
-        glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
+        // glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
+        glDrawArrays(GL_TRIANGLES, 0, myImport1.numVertices);
+
 
         glfwSwapBuffers(myWindow);
         //absolutely necessary otherwise you get unclosable transparent window that hogs resources

@@ -90,6 +90,7 @@ void ShapeBuilder::cleanUP() {
 std::vector<std::string> ShapeBuilder::splitFileLine(std::string fileLine) {
     std::vector<std::string> fileList;
     std::string processedLine = std::regex_replace(fileLine, std::regex("/"), " ");
+    processedLine = std::regex_replace(processedLine, std::regex("  "), " ");
     while(processedLine.find(" ") != std::string::npos) {
         fileList.push_back(processedLine.substr(0, processedLine.find(" ")));
         processedLine.erase(processedLine.begin(), processedLine.begin() + processedLine.find(" ") + 1);
@@ -102,6 +103,7 @@ std::vector<std::string> ShapeBuilder::splitFileLine(std::string fileLine) {
 void ShapeBuilder::importShape(std::string path) {
     std::vector<glm::vec3> vertexList;
     std::vector<glm::vec3> normalList;
+    std::vector<std::vector<string>> faceList;
     std::vector<Vertex> tempVertList;
     std::vector<GLuint> tempIndList;
 
@@ -124,17 +126,20 @@ void ShapeBuilder::importShape(std::string path) {
         }else if(fileList[0] == "vn") {
             normalList.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
         }else if(fileList[0] == "f") {
-            for(int i{1}; i < fileList.size(); i+=3) {
-                //from what I understand the face portion of .obj files specifies the vertex as well as the vertex normals it wants to use for a face
-                //however in OpenGL every normal is tied with every vertex, meaning if I want different vertex normals I need to create whole different vertices
-                //this makes the indexing useless as I have to use every vertex I created anyway. I'm just adding it to keep the style consistent
-                Vertex tempVert;
-                tempVert.position = vertexList[std::stoi(fileList[i]) - 1];
-                //TODO process texture fileList[i+1]
-                tempVert.normal = vertexList[std::stoi(fileList[i+2]) - 1];
-                tempVert.color = vec3(0.0,0.0,1.0f);
-                tempVertList.push_back(tempVert);
-            }
+            faceList.push_back(fileList);
+        }
+    }
+    for(auto& it : faceList) {
+        for(int i{1}; i < it.size(); i+=3) {
+            //from what I understand the face portion of .obj files specifies the vertex as well as the vertex normals it wants to use for a face
+            //however in OpenGL every normal is tied with every vertex, meaning if I want different vertex normals I need to create whole different vertices
+            //this makes the indexing useless as I have to use every vertex I created anyway. I'm just adding it to keep the style consistent
+            Vertex tempVert;
+            tempVert.position = vertexList[std::stoi(it[i]) - 1];
+            //TODO process texture fileList[i+1]
+            tempVert.normal = vertexList[std::stoi(it[i+2]) - 1];
+            tempVert.color = vec3(0.0,0.0,1.0f);
+            tempVertList.push_back(tempVert);
         }
     }
     delete[] vertexData;
