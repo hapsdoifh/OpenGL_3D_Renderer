@@ -117,14 +117,14 @@ int main(int argc, char* argv[])
         glwindow.bindVAO(1);
         glDrawArrays(GL_LINES, 0, myNorms1.numVertices);
 
+        glwindow.bindVAO(2);
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, -10.0f, -10.0f), glm::vec3(-90.0f,180.0f,0.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat);
-        glwindow.bindVAO(2);
         glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
         // glDrawArrays(GL_TRIANGLES, 0, myImport1.numVertices);
 
-        glwindow.bindVAO(3);
-        glDrawArrays(GL_LINES, 0, myNorms2.numVertices);
+        // glwindow.bindVAO(3);
+        // glDrawArrays(GL_LINES, 0, myNorms2.numVertices);
 
 
         glfwSwapBuffers(myWindow);
@@ -135,6 +135,7 @@ int main(int argc, char* argv[])
     myCube1.cleanUP();
     myNorms1.cleanUP();
     myImport1.cleanUP();
+    myNorms2.cleanUP();
 
     glfwDestroyWindow(myWindow);
     glfwTerminate();

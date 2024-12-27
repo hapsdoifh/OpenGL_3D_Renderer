@@ -116,12 +116,12 @@ void ShapeBuilder::importShape(std::string path) {
         }
         //std::cout << faceList.size() << std::endl;
     }
-
-    for(auto& it : faceList) {
+    std::cout << "completed position and vertex import" << std::endl;
+    for(std::vector<string>& it : faceList) {
         std::vector<int> vertOrder = {0,1,2,0,2,3};
         if(it.size() <= 10)
             vertOrder = std::vector<int>(vertOrder.begin(), vertOrder.begin()+3);
-        for(auto& i : vertOrder) {
+        for(int i : vertOrder) {
             //from what I understand the face portion of .obj files specifies the vertex as well as the vertex normals it wants to use for a face
             //however in OpenGL every normal is tied with every vertex, meaning if I want different vertex normals I need to create whole different vertices
             //this makes the indexing useless as I have to use every vertex I created anyway. I'm just adding it to keep the style consistent
@@ -136,17 +136,20 @@ void ShapeBuilder::importShape(std::string path) {
             tempVert.position = vertexList[vertInd - 1];
             if(!normalList.empty())
                 tempVert.normal = normalList[normInd - 1];
+            else
+                tempVert.normal = glm::vec3(0.0,0.0,0.0);
 
             tempVert.color = vec3(0.0,0.0,1.0f);
             tempVertList.push_back(tempVert);
         }
     }
+    std::cout << "completed normal import" << std::endl;
     delete[] vertexData;
     delete[] indexData; //just to be safe
 
     numVertices = tempVertList.size();
     vertexByteSize = numVertices * sizeof(Vertex);
-    vertexData = new Vertex[tempVertList.size()];
+    vertexData = new Vertex[numVertices];
     memcpy(vertexData, &tempVertList[0], tempVertList.size() * sizeof(Vertex));
 
     numIndices = numVertices;
@@ -156,7 +159,7 @@ void ShapeBuilder::importShape(std::string path) {
         indexData[i] = i; //just filler to keep the consistent glDrawElement method
     }
     //manually calculate vertex norm because it's not given in the file
-    if(normalList.empty()) {
+    if(normalList.empty()  || true) {
         calcVertexNorm();
     }
 }
@@ -175,6 +178,10 @@ void ShapeBuilder::calcVertexNorm() {
         vertexData[currVertex].normal += faceNormal;
         vertexData[currVertexA].normal += faceNormal;
         vertexData[currVertexB].normal += faceNormal;
+        // std::cout << faceNormal.x << ", " << faceNormal.y << ", " << faceNormal.z << std::endl;
+        // if((faceNormal.x == 0 && faceNormal.y == 0) || (faceNormal.x == 0 && faceNormal.z == 0) || (faceNormal.y == 0 && faceNormal.z == 0)) {
+        //     std::cout << faceNormal.x << ", " << faceNormal.y << ", " << faceNormal.z << std::endl;
+        // }
     }
 
     for(int i{0}; i < numVertices; i++) {
@@ -185,10 +192,18 @@ void ShapeBuilder::calcVertexNorm() {
 
 ShapeBuilder::ShapeBuilder():
 vertexData(nullptr),
-indexData(nullptr)
+indexData(nullptr),
+numVertices(0),
+numIndices(0),
+vertexByteSize(0),
+indexByteSize(0)
 {
 
 }
 
 ShapeBuilder::~ShapeBuilder() {
+    delete[] vertexData;
+    vertexData = nullptr;
+    delete[] indexData;
+    indexData = nullptr;
 }
