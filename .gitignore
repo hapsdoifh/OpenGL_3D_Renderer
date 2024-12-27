@@ -13,3 +13,5 @@ Dependencies/
 *.3.dylib
 
 *.a
+
+*.obj

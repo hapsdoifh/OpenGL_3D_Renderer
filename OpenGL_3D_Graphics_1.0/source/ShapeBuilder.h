@@ -8,6 +8,7 @@
 #include <glad/glad.h>
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 using glm::vec2;
 using glm::vec3;
@@ -15,6 +16,8 @@ using glm::vec4;
 
 using glm::mat3;
 using glm::vec4;
+
+using std::string;
 
 struct Vertex {
     glm::vec3 position;
@@ -36,7 +39,11 @@ public:
     GLuint* indexData;
     void buildCube(GLfloat sideLengthScale=1.0f, glm::vec3 color=glm::vec3(0,0,0));
     void buildNormals(ShapeBuilder& srcShape);
-    void importData(); //FUTURE TODO
+    std::vector<std::string> splitFileLine(std::string fileLine);
+    void fileImportConcurrent(string& fileStr, long start, long end, std::string newLine,
+        std::vector<vec3>& destVert, std::vector<vec3>& destNorm, std::vector<std::vector<std::string>>& destFace);
+    void importShape(std::string path);
+    void calcVertexNorm();
     void cleanUP();
 };
 

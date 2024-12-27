@@ -150,15 +150,16 @@ void GLWindow::creatProgram() {
 }
 
 mat4 GLWindow::generateMovementMat(vec3 position, vec3 rotation) {
-    GLfloat maxAngle = glm::max(rotation.x, rotation.y, rotation.z);
-    vec3 rotateScale = glm::vec3(rotation.x / maxAngle, rotation.y / maxAngle, rotation.z/maxAngle); //based on rotation.x
-    const mat4 ret = glm::rotate(mat4(1.0f), glm::radians(maxAngle), rotateScale);
-    return glm::translate(ret, position);
+    const mat4 transMat = glm::translate(mat4(1.0f), position);
+    mat4 rotateMat = glm::rotate(transMat, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    rotateMat = glm::rotate(rotateMat, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    rotateMat = glm::rotate(rotateMat, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    return rotateMat;
 }
 
 
 void GLWindow::sendUniformComponents(int width, int height, mat4 modelWorldMat, GLfloat FOV) {
-    //glm transformations follow normal conventions, eg: translate(A,B) = A*B
+    //glm transformations follow this convention the first operation is applied last / the function is applied to the right of existing matrix: translate(Existing,param) = Existing * Translate
 
     //projection (to projection)
     mat4 projMat = glm::perspective(glm::radians(FOV), (float)width/height, 0.1f, 100.0f);
@@ -172,7 +173,7 @@ void GLWindow::sendUniformComponents(int width, int height, mat4 modelWorldMat, 
     glUniformMatrix4fv(modelWorldMatLoc, 1, GL_FALSE, &modelWorldMat[0][0]);
 
     GLint lightPosLoc = glGetUniformLocation(programID, "lightPos");
-    vec3 lightPos(0.0f,6.0f,0.0f);
+    vec3 lightPos(10.0f,6.0f,0.0f);
     glUniform3fv(lightPosLoc, 1, &lightPos[0]);
 
     GLint ambientLoc = glGetUniformLocation(programID, "ambient");

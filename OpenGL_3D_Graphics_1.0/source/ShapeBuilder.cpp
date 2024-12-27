@@ -3,7 +3,11 @@
 //
 
 #include "ShapeBuilder.h"
-// #include <iostream>
+
+#include <complex>
+#include <regex>
+#include <unistd.h>
+#include <thread>
 
 void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
 
@@ -29,25 +33,6 @@ void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
         0,4,2, 4,6,2,
         1,7,5, 1,3,7,
     };
-    //calculate vertex normals:
-    std::vector<glm::vec3>faceNormals;
-    for(GLuint faceIt{0}; faceIt < sizeof(cubeInds)/sizeof(GLuint); faceIt += 3) {
-        glm::vec3 edgeVecA, edgeVecB;
-        GLuint currVertex = cubeInds[faceIt];
-        GLuint currVertexA = cubeInds[faceIt+1];
-        GLuint currVertexB = cubeInds[faceIt+2];
-        edgeVecA = cubeVerts[currVertexA].position - cubeVerts[currVertex].position;
-        edgeVecB = cubeVerts[currVertexB].position - cubeVerts[currVertexA].position;
-        glm::vec3 faceNormal = glm::normalize(glm::cross(edgeVecA, edgeVecB)); // weight each face equally, is optional
-
-        cubeVerts[currVertex].normal += faceNormal;
-        cubeVerts[currVertexA].normal += faceNormal;
-        cubeVerts[currVertexB].normal += faceNormal;
-    }
-
-    for(Vertex &vertIt : cubeVerts) {
-        vertIt.normal = glm::normalize(vertIt.normal);
-    }
 
     //copy vertex data
     numVertices = sizeof(cubeVerts)/sizeof(cubeVerts[0]);
@@ -61,6 +46,7 @@ void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
     indexData = new GLuint[numIndices];
     indexByteSize = sizeof(cubeInds);
     memcpy(indexData, cubeInds, indexByteSize);
+    calcVertexNorm();
 }
 
 void ShapeBuilder::buildNormals(ShapeBuilder &srcShape) {
@@ -86,9 +72,202 @@ void ShapeBuilder::cleanUP() {
     indexData = nullptr;
 }
 
-ShapeBuilder::ShapeBuilder() {
+std::vector<std::string> ShapeBuilder::splitFileLine(std::string fileLine) {
+    std::vector<std::string> fileList;
+    std::string processedLine = std::regex_replace(fileLine, std::regex("/"), " ");
+    processedLine = std::regex_replace(processedLine, std::regex("  "), " ");
+    while(processedLine.find(" ") != std::string::npos) {
+        fileList.push_back(processedLine.substr(0, processedLine.find(" ")));
+        processedLine.erase(processedLine.begin(), processedLine.begin() + processedLine.find(" ") + 1);
+    }
+    if(!processedLine.empty())
+        fileList.push_back(processedLine.substr(0,processedLine.size()));
+    return fileList;
+}
+
+void ShapeBuilder::fileImportConcurrent(std::string &fileStr, long start, long end, std::string newLine,
+    std::vector<vec3> &destVert, std::vector<vec3> &destNorm, std::vector<std::vector<std::string>> &destFace) {
+    long pos{start};
+    while(pos < end) {
+        long lineEnd;
+        std::basic_string<char>::size_type findResult = fileStr.find(newLine, pos);
+        if(findResult == std::string::npos)
+            lineEnd = end;
+        else
+            lineEnd = static_cast<long>(findResult);
+
+        std::string fileLine = fileStr.substr(pos, lineEnd - pos);
+        std::vector<std::string> fileList = splitFileLine(fileLine);
+        pos = lineEnd + newLine.size();
+        if(fileList.empty())
+            continue;
+        if(fileList[0] == "v" ) {
+            destVert.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
+        }else if(fileList[0] == "vn") {
+            destNorm.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
+        }else if(fileList[0] == "f") {
+            destFace.push_back(fileList);
+        }
+    }
+}
+
+
+void ShapeBuilder::importShape(std::string path) {
+    std::vector<glm::vec3> vertexList;
+    std::vector<glm::vec3> normalList;
+    std::vector<std::vector<string>> faceList;
+    std::vector<Vertex> tempVertList;
+    std::vector<GLuint> tempIndList;
+
+    char cwd[100];
+    if(getcwd(cwd, 100) != nullptr)
+        std::cout << cwd << std::endl;
+
+    std::string curPath = cwd;
+    std::string relative_path = curPath + "/../OpenGL_3D_Graphics_1.0/source/" + path;
+    std::ifstream shapeFile(relative_path, std::ios::in);
+    if(!shapeFile.is_open()) {
+        std::cout << "Cannot open shape file, exitting";
+        exit(0);
+    }
+    std::string entireFile((std::istreambuf_iterator<char>(shapeFile)), std::istreambuf_iterator<char>());
+    std::string newLine = "\n";
+    if(entireFile.find("\r\n") != std::string::npos)
+        newLine = "\r\n";
+    std::cout << "done search of file for newline character, it is:" << newLine.size() << std::endl;
+
+    int threadCount = 8;
+    long chunkSize = entireFile.size() / threadCount;
+    std::vector<long> startLoc(threadCount + 1, 0);
+    std::vector<std::thread> readerThreads(threadCount);
+
+    std::vector<std::vector<glm::vec3>> vertexChunkList(threadCount);
+    std::vector<std::vector<glm::vec3>> normalChunkList(threadCount);
+    std::vector<std::vector<std::vector<string>>> faceChunkList(threadCount);
+    for(int i{1}; i <= threadCount; i++) {
+        startLoc[i] = chunkSize * i;
+
+        if(i < threadCount) {
+            long nextLine = entireFile.find(newLine,startLoc[i]);
+            startLoc[i] = nextLine + newLine.size();
+        }else {
+            startLoc[i] = entireFile.size();
+        }
+
+        readerThreads[i-1] = std::thread(&ShapeBuilder::fileImportConcurrent, this, std::ref(entireFile), startLoc[i - 1], startLoc[i], newLine,
+            std::ref(vertexChunkList[i - 1]), std::ref(normalChunkList[i - 1]), std::ref(faceChunkList[i - 1]));
+    }
+    for(auto& threadIt : readerThreads) {
+        threadIt.join();
+    }
+    for(int i{0}; i<threadCount; i++) {
+        vertexList.insert(vertexList.end(),vertexChunkList[i].begin(),vertexChunkList[i].end());
+        normalList.insert(normalList.end(),normalChunkList[i].begin(),normalChunkList[i].end());
+        faceList.insert(faceList.end(),faceChunkList[i].begin(),faceChunkList[i].end());
+    }
+    //
+    // std::string fileLine;
+    // while(std::getline(shapeFile, fileLine)) {
+    //     std::vector<std::string> fileList = splitFileLine(fileLine);
+    //     if(fileList.empty())
+    //         continue;
+    //     if(fileList[0] == "v" ) {
+    //         vertexList.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
+    //     }else if(fileList[0] == "vn") {
+    //         normalList.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
+    //     }else if(fileList[0] == "f") {
+    //         faceList.push_back(fileList);
+    //     }
+    //     //std::cout << faceList.size() << std::endl;
+    // }
+    std::cout << "completed position and vertex import" << std::endl;
+    for(std::vector<string>& it : faceList) {
+        std::vector<int> vertOrder = {0,1,2,0,2,3};
+        if(it.size() <= 10)
+            vertOrder = std::vector<int>(vertOrder.begin(), vertOrder.begin()+3);
+        for(int i : vertOrder) {
+            //from what I understand the face portion of .obj files specifies the vertex as well as the vertex normals it wants to use for a face
+            //however in OpenGL every normal is tied with every vertex, meaning if I want different vertex normals I need to create whole different vertices
+            //this makes the indexing useless as I have to use every vertex I created anyway. I'm just adding it to keep the style consistent
+            //size 6,8 => no texture eg: v/vn | size 9,12 => has texture eg: v/vt/vn (very basic checking)
+            Vertex tempVert;
+            int stride = 3;
+            if((it.size() - 1) == 6 || (it.size() - 1) == 8) //minus the first symbol
+                stride = 2;
+            int vertInd = std::stoi(it[i*stride + 1]);
+            //TODO process texture fileList[i+1]
+            int normInd = std::stoi(it[i*stride + stride]);
+            tempVert.position = vertexList[vertInd - 1];
+            if(!normalList.empty())
+                tempVert.normal = normalList[normInd - 1];
+            else
+                tempVert.normal = glm::vec3(0.0,0.0,0.0);
+
+            tempVert.color = vec3(0.0,0.0,1.0f);
+            tempVertList.push_back(tempVert);
+        }
+    }
+    std::cout << "completed normal import" << std::endl;
+    delete[] vertexData;
+    delete[] indexData; //just to be safe
+
+    numVertices = tempVertList.size();
+    vertexByteSize = numVertices * sizeof(Vertex);
+    vertexData = new Vertex[numVertices];
+    memcpy(vertexData, &tempVertList[0], tempVertList.size() * sizeof(Vertex));
+
+    numIndices = numVertices;
+    indexByteSize = numIndices * sizeof(GLuint);
+    indexData = new GLuint[numIndices];
+    for(int i{0}; i < numIndices; i++) {
+        indexData[i] = i; //just filler to keep the consistent glDrawElement method
+    }
+    //manually calculate vertex norm because it's not given in the file
+    if(normalList.empty()) {
+        calcVertexNorm();
+    }
+}
+
+void ShapeBuilder::calcVertexNorm() {
+    //cycle through all the faces and calculate face normals, add normal to contributing to vertices of that face
+    for(GLuint faceIt{0}; faceIt < numIndices; faceIt += 3) {
+        glm::vec3 edgeVecA, edgeVecB;
+        GLuint currVertex = indexData[faceIt];
+        GLuint currVertexA = indexData[faceIt+1];
+        GLuint currVertexB = indexData[faceIt+2];
+        edgeVecA = vertexData[currVertexA].position - vertexData[currVertex].position;
+        edgeVecB = vertexData[currVertexB].position - vertexData[currVertexA].position;
+        glm::vec3 faceNormal = glm::normalize(glm::cross(edgeVecA, edgeVecB)); // weight each face equally, is optional
+
+        vertexData[currVertex].normal += faceNormal;
+        vertexData[currVertexA].normal += faceNormal;
+        vertexData[currVertexB].normal += faceNormal;
+        // std::cout << faceNormal.x << ", " << faceNormal.y << ", " << faceNormal.z << std::endl;
+        // if((faceNormal.x == 0 && faceNormal.y == 0) || (faceNormal.x == 0 && faceNormal.z == 0) || (faceNormal.y == 0 && faceNormal.z == 0)) {
+        //     std::cout << faceNormal.x << ", " << faceNormal.y << ", " << faceNormal.z << std::endl;
+        // }
+    }
+
+    for(int i{0}; i < numVertices; i++) {
+        vertexData[i].normal = glm::normalize(vertexData[i].normal);
+    }
+
+}
+
+ShapeBuilder::ShapeBuilder():
+vertexData(nullptr),
+indexData(nullptr),
+numVertices(0),
+numIndices(0),
+vertexByteSize(0),
+indexByteSize(0)
+{
 
 }
 
 ShapeBuilder::~ShapeBuilder() {
+    delete[] vertexData;
+    vertexData = nullptr;
+    delete[] indexData;
+    indexData = nullptr;
 }
