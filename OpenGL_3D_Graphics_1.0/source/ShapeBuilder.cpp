@@ -7,6 +7,7 @@
 #include <complex>
 #include <regex>
 #include <unistd.h>
+#include <thread>
 
 void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
 
@@ -84,6 +85,33 @@ std::vector<std::string> ShapeBuilder::splitFileLine(std::string fileLine) {
     return fileList;
 }
 
+void ShapeBuilder::fileImportConcurrent(std::string &fileStr, long start, long end, std::string newLine,
+    std::vector<vec3> &destVert, std::vector<vec3> &destNorm, std::vector<std::vector<std::string>> &destFace) {
+    long pos{start};
+    while(pos < end) {
+        long lineEnd;
+        std::basic_string<char>::size_type findResult = fileStr.find(newLine, pos);
+        if(findResult == std::string::npos)
+            lineEnd = end;
+        else
+            lineEnd = static_cast<long>(findResult);
+
+        std::string fileLine = fileStr.substr(pos, lineEnd - pos);
+        std::vector<std::string> fileList = splitFileLine(fileLine);
+        pos = lineEnd + newLine.size();
+        if(fileList.empty())
+            continue;
+        if(fileList[0] == "v" ) {
+            destVert.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
+        }else if(fileList[0] == "vn") {
+            destNorm.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
+        }else if(fileList[0] == "f") {
+            destFace.push_back(fileList);
+        }
+    }
+}
+
+
 void ShapeBuilder::importShape(std::string path) {
     std::vector<glm::vec3> vertexList;
     std::vector<glm::vec3> normalList;
@@ -102,20 +130,56 @@ void ShapeBuilder::importShape(std::string path) {
         std::cout << "Cannot open shape file, exitting";
         exit(0);
     }
-    std::string fileLine;
-    while(std::getline(shapeFile, fileLine)) {
-        std::vector<std::string> fileList = splitFileLine(fileLine);
-        if(fileList.empty())
-            continue;
-        if(fileList[0] == "v" ) {
-            vertexList.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
-        }else if(fileList[0] == "vn") {
-            normalList.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
-        }else if(fileList[0] == "f") {
-            faceList.push_back(fileList);
+    std::string entireFile((std::istreambuf_iterator<char>(shapeFile)), std::istreambuf_iterator<char>());
+    std::string newLine = "\n";
+    if(entireFile.find("\r\n") != std::string::npos)
+        newLine = "\r\n";
+    std::cout << "done search of file for newline character, it is:" << newLine.size() << std::endl;
+
+    int threadCount = 8;
+    long chunkSize = entireFile.size() / threadCount;
+    std::vector<long> startLoc(threadCount + 1, 0);
+    std::vector<std::thread> readerThreads(threadCount);
+
+    std::vector<std::vector<glm::vec3>> vertexChunkList(threadCount);
+    std::vector<std::vector<glm::vec3>> normalChunkList(threadCount);
+    std::vector<std::vector<std::vector<string>>> faceChunkList(threadCount);
+    for(int i{1}; i <= threadCount; i++) {
+        startLoc[i] = chunkSize * i;
+
+        if(i < threadCount) {
+            long nextLine = entireFile.find(newLine,startLoc[i]);
+            startLoc[i] = nextLine + newLine.size();
+        }else {
+            startLoc[i] = entireFile.size();
         }
-        //std::cout << faceList.size() << std::endl;
+
+        readerThreads[i-1] = std::thread(&ShapeBuilder::fileImportConcurrent, this, std::ref(entireFile), startLoc[i - 1], startLoc[i], newLine,
+            std::ref(vertexChunkList[i - 1]), std::ref(normalChunkList[i - 1]), std::ref(faceChunkList[i - 1]));
     }
+    for(auto& threadIt : readerThreads) {
+        threadIt.join();
+    }
+    for(int i{0}; i<threadCount; i++) {
+        vertexList.insert(vertexList.end(),vertexChunkList[i].begin(),vertexChunkList[i].end());
+        normalList.insert(normalList.end(),normalChunkList[i].begin(),normalChunkList[i].end());
+        faceList.insert(faceList.end(),faceChunkList[i].begin(),faceChunkList[i].end());
+    }
+    //
+    // std::string fileLine;
+    // while(std::getline(shapeFile, fileLine)) {
+    //     std::vector<std::string> fileList = splitFileLine(fileLine);
+    //     if(fileList.empty())
+    //         continue;
+    //     if(fileList[0] == "v" ) {
+    //         vertexList.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
+    //     }else if(fileList[0] == "vn") {
+    //         normalList.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
+    //     }else if(fileList[0] == "f") {
+    //         faceList.push_back(fileList);
+    //     }
+    //     //std::cout << faceList.size() << std::endl;
+    // }
     std::cout << "completed position and vertex import" << std::endl;
     for(std::vector<string>& it : faceList) {
         std::vector<int> vertOrder = {0,1,2,0,2,3};
@@ -159,7 +223,7 @@ void ShapeBuilder::importShape(std::string path) {
         indexData[i] = i; //just filler to keep the consistent glDrawElement method
     }
     //manually calculate vertex norm because it's not given in the file
-    if(normalList.empty()  || true) {
+    if(normalList.empty()) {
         calcVertexNorm();
     }
 }

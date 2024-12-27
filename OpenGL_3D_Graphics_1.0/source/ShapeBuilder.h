@@ -40,7 +40,9 @@ public:
     void buildCube(GLfloat sideLengthScale=1.0f, glm::vec3 color=glm::vec3(0,0,0));
     void buildNormals(ShapeBuilder& srcShape);
     std::vector<std::string> splitFileLine(std::string fileLine);
-    void importShape(std::string path); //FUTURE TODO
+    void fileImportConcurrent(string& fileStr, long start, long end, std::string newLine,
+        std::vector<vec3>& destVert, std::vector<vec3>& destNorm, std::vector<std::vector<std::string>>& destFace);
+    void importShape(std::string path);
     void calcVertexNorm();
     void cleanUP();
 };
