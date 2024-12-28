@@ -18,12 +18,13 @@ using glm::mat3;
 using glm::vec4;
 
 using std::string;
+using std::vector;
 
 struct Vertex {
     glm::vec3 position;
     glm::vec3 color;
-    // glm::vec2 texture;
     glm::vec3 normal;
+    glm::vec2 texture;
 };
 
 class ShapeBuilder {
@@ -40,8 +41,8 @@ public:
     void buildCube(GLfloat sideLengthScale=1.0f, glm::vec3 color=glm::vec3(0,0,0));
     void buildNormals(ShapeBuilder& srcShape);
     std::vector<std::string> splitFileLine(std::string fileLine);
-    void fileImportConcurrent(string& fileStr, long start, long end, std::string newLine,
-        std::vector<vec3>& destVert, std::vector<vec3>& destNorm, std::vector<std::vector<std::string>>& destFace);
+    void fileImportParallel(string& fileStr, long start, long end, std::string newLine,
+        std::vector<vec3>& destVert, std::vector<vec3>& destNorm, vector<vec2> &destTex, std::vector<std::vector<std::string>>& destFace);
     void importShape(std::string path);
     void calcVertexNorm();
     void cleanUP();

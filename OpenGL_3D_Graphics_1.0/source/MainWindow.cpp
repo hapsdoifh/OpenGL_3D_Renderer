@@ -4,6 +4,7 @@
 #include <GLWindow.h>
 #include <ShapeBuilder.h>
 #include <glfw3.h>
+#include <stb_image.h>
 
 int main(int argc, char* argv[])
 {
@@ -58,25 +59,32 @@ int main(int argc, char* argv[])
     glwindow.createVAO();
     glwindow.createVBO(myCube1.vertexByteSize, myCube1.vertexData);
     glwindow.createEBO(myCube1.indexByteSize, myCube1.indexData);
-    glwindow.setVertexAttribPtr(0,3,9 * sizeof(GLfloat), 0);
-    glwindow.setVertexAttribPtr(1,3,9 * sizeof(GLfloat), 3 * sizeof(GLfloat));
-    glwindow.setVertexAttribPtr(2,3,9 * sizeof(GLfloat), 6 * sizeof(GLfloat));
+    glwindow.setVertexAttribPtr(0,3,sizeof(Vertex), 0);
+    glwindow.setVertexAttribPtr(1,3,sizeof(Vertex), 3 * sizeof(GLfloat));
+    glwindow.setVertexAttribPtr(2,3,sizeof(Vertex), 6 * sizeof(GLfloat));
     glwindow.unbindVAO(0);
 
     //Normals
     glwindow.createVAO();
     glwindow.createVBO(myNorms1.vertexByteSize, myNorms1.vertexData);
     glwindow.createEBO(myNorms1.indexByteSize, myNorms1.indexData);
-    glwindow.setVertexAttribPtr(0,3,9 * sizeof(GLfloat), 0);
+    glwindow.setVertexAttribPtr(0,3,sizeof(Vertex), 0);
     glwindow.unbindVAO(1);
 
-    //ImportCube
+    //ImportShape
     glwindow.createVAO();
     glwindow.createVBO(myImport1.vertexByteSize, myImport1.vertexData);
     glwindow.createEBO(myImport1.indexByteSize, myImport1.indexData);
-    glwindow.setVertexAttribPtr(0,3,9*sizeof(GLfloat), 0);
-    glwindow.setVertexAttribPtr(1,3,9*sizeof(GLfloat), 3 * sizeof(GLfloat));
-    glwindow.setVertexAttribPtr(2,3,9*sizeof(GLfloat), 6 * sizeof(GLfloat));
+    int width, height, nChannel;
+    unsigned char* texData = stbi_load("180212_Erik_XIV_Rustning_2_u1_v1.png", &width, &height, &nChannel, 0);
+
+    GLenum colorType = nChannel == 3 ? GL_RGB : GL_RGBA;
+    glwindow.createTexO(width, height, colorType, texData);
+    stbi_image_free(texData);
+    glwindow.setVertexAttribPtr(0,3,sizeof(Vertex), 0);
+    glwindow.setVertexAttribPtr(1,3,sizeof(Vertex), 3 * sizeof(GLfloat));
+    glwindow.setVertexAttribPtr(2,3,sizeof(Vertex), 6 * sizeof(GLfloat));
+    glwindow.setVertexAttribPtr(3,2,sizeof(Vertex), 9 * sizeof(GLfloat));
     glwindow.unbindVAO(2);
 
 
@@ -84,7 +92,7 @@ int main(int argc, char* argv[])
     glwindow.createVAO();
     glwindow.createVBO(myNorms2.vertexByteSize, myNorms2.vertexData);
     glwindow.createEBO(myNorms2.indexByteSize, myNorms2.indexData);
-    glwindow.setVertexAttribPtr(0,3,9 * sizeof(GLfloat), 0);
+    glwindow.setVertexAttribPtr(0,3,sizeof(Vertex), 0);
     glwindow.unbindVAO(3);
 
 
@@ -93,8 +101,7 @@ int main(int argc, char* argv[])
 
     glwindow.creatProgram();
     glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_CULL_FACE);
-    // glCullFace(GL_FRONT);
+    glEnable(GL_CULL_FACE);
 
     while(!glfwWindowShouldClose(myWindow)) {
         int width, height;
@@ -105,12 +112,12 @@ int main(int argc, char* argv[])
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 
-        // glCullFace(GL_BACK);
-        // glDrawArrays(GL_TRIANGLES, 0, 3);
+        glCullFace(GL_BACK);
         glwindow.getPollingUpdate();
 
+        glwindow.bindVAO(0);
         mat4 modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f,0.0f,30.0f));
-        glwindow.sendUniformComponents(width, height, modWorldMat);
+        glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
         glwindow.bindVAO(0);
         glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
@@ -118,10 +125,15 @@ int main(int argc, char* argv[])
         glDrawArrays(GL_LINES, 0, myNorms1.numVertices);
 
         glwindow.bindVAO(2);
+        GLint texLoc = glGetUniformLocation(glwindow.programID, "texture0");
+        glUniform1i(texLoc, 0);
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, -10.0f, -10.0f), glm::vec3(-90.0f,180.0f,0.0f));
-        glwindow.sendUniformComponents(width, height, modWorldMat);
+        glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
         glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
-        // glDrawArrays(GL_TRIANGLES, 0, myImport1.numVertices);
+
+        modWorldMat = glwindow.generateMovementMat(vec3(0.0f, -10.0f, 10.0f), glm::vec3(-90.0f,0.0f,0.0f));
+        glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
+        glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
         // glwindow.bindVAO(3);
         // glDrawArrays(GL_LINES, 0, myNorms2.numVertices);

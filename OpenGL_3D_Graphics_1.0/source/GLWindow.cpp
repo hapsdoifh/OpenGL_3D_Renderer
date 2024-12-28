@@ -72,6 +72,19 @@ void GLWindow::unbindVAO(int index) {
     }
 }
 
+void GLWindow::createTexO(int width, int height, GLenum colorType, unsigned char *data) {
+    GLuint tempTexID;
+    glGenTextures(1,&tempTexID);
+    textureBufferIDs.push_back(tempTexID);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tempTexID);
+
+    if(data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, colorType, width, height, 0, colorType, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+}
+
 
 bool GLWindow::readShaderFile(const std::string &path, std::string &dest) {
     char cwd[100];
@@ -173,7 +186,7 @@ void GLWindow::sendUniformComponents(int width, int height, mat4 modelWorldMat, 
     glUniformMatrix4fv(modelWorldMatLoc, 1, GL_FALSE, &modelWorldMat[0][0]);
 
     GLint lightPosLoc = glGetUniformLocation(programID, "lightPos");
-    vec3 lightPos(10.0f,6.0f,0.0f);
+    vec3 lightPos(10.0f,50.0f,0.0f);
     glUniform3fv(lightPosLoc, 1, &lightPos[0]);
 
     GLint ambientLoc = glGetUniformLocation(programID, "ambient");

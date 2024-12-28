@@ -26,6 +26,7 @@ class GLWindow{
 
 	std::vector<GLuint> vertexBufferIDs;
 	std::vector<GLuint> indexBufferIDs;
+	std::vector<GLuint> textureBufferIDs;
 
 	std::vector<GLuint> vertexArrayIDs;
 
@@ -50,7 +51,8 @@ public:
 	~GLWindow();
 
 	void createVBO(GLuint size, Vertex* vertexData); //Vertex Buffer Object
-	void createEBO(GLuint, GLuint* indexData); //Element Buffer Object
+	void createEBO(GLuint size, GLuint* indexData); //Element Buffer Object
+	void createTexO(int width, int height, GLenum colorType, unsigned char* data);
 	void createShaders();
 	void createVAO();
 	void bindVAO(int index);

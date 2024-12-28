@@ -3,7 +3,7 @@
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 Color;
 layout(location = 2) in vec3 normal;
-layout(location = 3) in vec2 texture;
+layout(location = 3) in vec2 Texture;
 
 uniform mat4 viewProjMat;
 uniform mat4 modelWorldMat;
@@ -24,4 +24,5 @@ void main(){
     float intensity = max(dot(transformedNorm, lightDir),0.0f);
     theColor = (intensity + ambient) * Color;
     //theColor = vec3(1.0,1.0,1.0);
+    texCoord = Texture;
 }

@@ -8,20 +8,21 @@
 #include <regex>
 #include <unistd.h>
 #include <thread>
+#include <stb_image.h>
 
 void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
 
     //This is still a right-handed coordinate system so 1 will be closer than -1 once loaded in (in -z no rotation)
     Vertex cubeVerts[] {
-        sideLengthScale * glm::vec3(-1.0f, 1.0f, 1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(-1.0f, -1.0f,1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(1.0f, -1.0f, 1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, 1.0f, 1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, -1.0f,1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, -1.0f, 1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
 
-        sideLengthScale * glm::vec3(-1.0f, 1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(1.0f, 1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(-1.0f, -1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),
-        sideLengthScale * glm::vec3(1.0f, -1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0)
+        sideLengthScale * glm::vec3(-1.0f, 1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, 1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, -1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, -1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),  glm::vec2(0.0,0.0)
     };
 
 
@@ -72,8 +73,8 @@ void ShapeBuilder::cleanUP() {
     indexData = nullptr;
 }
 
-std::vector<std::string> ShapeBuilder::splitFileLine(std::string fileLine) {
-    std::vector<std::string> fileList;
+vector<std::string> ShapeBuilder::splitFileLine(std::string fileLine) {
+    vector<std::string> fileList;
     std::string processedLine = std::regex_replace(fileLine, std::regex("/"), " ");
     processedLine = std::regex_replace(processedLine, std::regex("  "), " ");
     while(processedLine.find(" ") != std::string::npos) {
@@ -85,8 +86,8 @@ std::vector<std::string> ShapeBuilder::splitFileLine(std::string fileLine) {
     return fileList;
 }
 
-void ShapeBuilder::fileImportConcurrent(std::string &fileStr, long start, long end, std::string newLine,
-    std::vector<vec3> &destVert, std::vector<vec3> &destNorm, std::vector<std::vector<std::string>> &destFace) {
+void ShapeBuilder::fileImportParallel(std::string &fileStr, long start, long end, std::string newLine,
+    vector<vec3> &destVert, vector<vec3> &destNorm, vector<vec2> &destTex, vector<vector<std::string>> &destFace) {
     long pos{start};
     while(pos < end) {
         long lineEnd;
@@ -97,7 +98,7 @@ void ShapeBuilder::fileImportConcurrent(std::string &fileStr, long start, long e
             lineEnd = static_cast<long>(findResult);
 
         std::string fileLine = fileStr.substr(pos, lineEnd - pos);
-        std::vector<std::string> fileList = splitFileLine(fileLine);
+        vector<std::string> fileList = splitFileLine(fileLine);
         pos = lineEnd + newLine.size();
         if(fileList.empty())
             continue;
@@ -105,6 +106,8 @@ void ShapeBuilder::fileImportConcurrent(std::string &fileStr, long start, long e
             destVert.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
         }else if(fileList[0] == "vn") {
             destNorm.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
+        }else if(fileList[0] == "vt") {
+            destTex.push_back(vec2(std::stof(fileList[1]),1.0f - std::stof(fileList[2])));
         }else if(fileList[0] == "f") {
             destFace.push_back(fileList);
         }
@@ -113,11 +116,12 @@ void ShapeBuilder::fileImportConcurrent(std::string &fileStr, long start, long e
 
 
 void ShapeBuilder::importShape(std::string path) {
-    std::vector<glm::vec3> vertexList;
-    std::vector<glm::vec3> normalList;
-    std::vector<std::vector<string>> faceList;
-    std::vector<Vertex> tempVertList;
-    std::vector<GLuint> tempIndList;
+    vector<glm::vec3> vertexList;
+    vector<glm::vec3> normalList;
+    vector<glm::vec2> texList;
+    vector<vector<string>> faceList;
+    vector<Vertex> tempVertList;
+    vector<GLuint> tempIndList;
 
     char cwd[100];
     if(getcwd(cwd, 100) != nullptr)
@@ -136,14 +140,15 @@ void ShapeBuilder::importShape(std::string path) {
         newLine = "\r\n";
     std::cout << "done search of file for newline character, it is:" << newLine.size() << std::endl;
 
-    int threadCount = 8;
+    int threadCount = 16;
     long chunkSize = entireFile.size() / threadCount;
-    std::vector<long> startLoc(threadCount + 1, 0);
-    std::vector<std::thread> readerThreads(threadCount);
+    vector<long> startLoc(threadCount + 1, 0);
+    vector<std::thread> readerThreads(threadCount);
 
-    std::vector<std::vector<glm::vec3>> vertexChunkList(threadCount);
-    std::vector<std::vector<glm::vec3>> normalChunkList(threadCount);
-    std::vector<std::vector<std::vector<string>>> faceChunkList(threadCount);
+    vector<vector<glm::vec3>> vertexChunkList(threadCount);
+    vector<vector<glm::vec3>> normalChunkList(threadCount);
+    vector<vector<glm::vec2>> texChunkList(threadCount);
+    vector<vector<vector<string>>> faceChunkList(threadCount);
     for(int i{1}; i <= threadCount; i++) {
         startLoc[i] = chunkSize * i;
 
@@ -154,8 +159,8 @@ void ShapeBuilder::importShape(std::string path) {
             startLoc[i] = entireFile.size();
         }
 
-        readerThreads[i-1] = std::thread(&ShapeBuilder::fileImportConcurrent, this, std::ref(entireFile), startLoc[i - 1], startLoc[i], newLine,
-            std::ref(vertexChunkList[i - 1]), std::ref(normalChunkList[i - 1]), std::ref(faceChunkList[i - 1]));
+        readerThreads[i-1] = std::thread(&ShapeBuilder::fileImportParallel, this, std::ref(entireFile), startLoc[i - 1], startLoc[i], newLine,
+            std::ref(vertexChunkList[i - 1]), std::ref(normalChunkList[i - 1]), std::ref(texChunkList[i-1]), std::ref(faceChunkList[i - 1]));
     }
     for(auto& threadIt : readerThreads) {
         threadIt.join();
@@ -163,28 +168,15 @@ void ShapeBuilder::importShape(std::string path) {
     for(int i{0}; i<threadCount; i++) {
         vertexList.insert(vertexList.end(),vertexChunkList[i].begin(),vertexChunkList[i].end());
         normalList.insert(normalList.end(),normalChunkList[i].begin(),normalChunkList[i].end());
+        texList.insert(texList.end(),texChunkList[i].begin(),texChunkList[i].end());
         faceList.insert(faceList.end(),faceChunkList[i].begin(),faceChunkList[i].end());
     }
-    //
-    // std::string fileLine;
-    // while(std::getline(shapeFile, fileLine)) {
-    //     std::vector<std::string> fileList = splitFileLine(fileLine);
-    //     if(fileList.empty())
-    //         continue;
-    //     if(fileList[0] == "v" ) {
-    //         vertexList.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
-    //     }else if(fileList[0] == "vn") {
-    //         normalList.push_back(vec3(std::stof(fileList[1]),std::stof(fileList[2]),std::stof(fileList[3])));
-    //     }else if(fileList[0] == "f") {
-    //         faceList.push_back(fileList);
-    //     }
-    //     //std::cout << faceList.size() << std::endl;
-    // }
+
     std::cout << "completed position and vertex import" << std::endl;
-    for(std::vector<string>& it : faceList) {
-        std::vector<int> vertOrder = {0,1,2,0,2,3};
+    for(vector<string>& it : faceList) {
+        vector<int> vertOrder = {0,1,2,0,2,3};
         if(it.size() <= 10)
-            vertOrder = std::vector<int>(vertOrder.begin(), vertOrder.begin()+3);
+            vertOrder = vector<int>(vertOrder.begin(), vertOrder.begin()+3);
         for(int i : vertOrder) {
             //from what I understand the face portion of .obj files specifies the vertex as well as the vertex normals it wants to use for a face
             //however in OpenGL every normal is tied with every vertex, meaning if I want different vertex normals I need to create whole different vertices
@@ -195,15 +187,18 @@ void ShapeBuilder::importShape(std::string path) {
             if((it.size() - 1) == 6 || (it.size() - 1) == 8) //minus the first symbol
                 stride = 2;
             int vertInd = std::stoi(it[i*stride + 1]);
-            //TODO process texture fileList[i+1]
+            int texInd = std::stoi(it[i*stride + 2]);
             int normInd = std::stoi(it[i*stride + stride]);
             tempVert.position = vertexList[vertInd - 1];
+            tempVert.normal = glm::vec3(0.0,0.0,0.0);
+            tempVert.texture = glm::vec2(0.0,0.0);
+
             if(!normalList.empty())
                 tempVert.normal = normalList[normInd - 1];
-            else
-                tempVert.normal = glm::vec3(0.0,0.0,0.0);
+            if(!texList.empty())
+                tempVert.texture = texList[texInd - 1];
 
-            tempVert.color = vec3(0.0,0.0,1.0f);
+            tempVert.color = vec3(1.0,1.0,1.0f);
             tempVertList.push_back(tempVert);
         }
     }
