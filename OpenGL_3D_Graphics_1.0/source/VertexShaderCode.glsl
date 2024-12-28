@@ -12,6 +12,7 @@ uniform vec3 ambient;
 
 out vec3 theColor;
 out vec2 texCoord;
+out float lightLevel;
 
 void main(){
     vec4 v = vec4(position, 1.0);
@@ -22,7 +23,8 @@ void main(){
     vec3 transformedNorm = normalize(normalRotateMat * normal);
     vec3 lightDir = normalize(lightPos - vec3(modelWorldMat*v));
     float intensity = max(dot(transformedNorm, lightDir),0.0f);
-    theColor = (intensity + ambient) * Color;
+    theColor = (intensity + ambient)*Color;
     //theColor = vec3(1.0,1.0,1.0);
+    lightLevel = intensity;
     texCoord = Texture;
 }
