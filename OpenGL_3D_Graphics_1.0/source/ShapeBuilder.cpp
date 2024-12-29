@@ -237,10 +237,6 @@ void ShapeBuilder::calcVertexNorm() {
         vertexData[currVertex].normal += faceNormal;
         vertexData[currVertexA].normal += faceNormal;
         vertexData[currVertexB].normal += faceNormal;
-        // std::cout << faceNormal.x << ", " << faceNormal.y << ", " << faceNormal.z << std::endl;
-        // if((faceNormal.x == 0 && faceNormal.y == 0) || (faceNormal.x == 0 && faceNormal.z == 0) || (faceNormal.y == 0 && faceNormal.z == 0)) {
-        //     std::cout << faceNormal.x << ", " << faceNormal.y << ", " << faceNormal.z << std::endl;
-        // }
     }
 
     for(int i{0}; i < numVertices; i++) {
@@ -248,6 +244,7 @@ void ShapeBuilder::calcVertexNorm() {
     }
 
 }
+
 
 ShapeBuilder::ShapeBuilder():
 vertexData(nullptr),

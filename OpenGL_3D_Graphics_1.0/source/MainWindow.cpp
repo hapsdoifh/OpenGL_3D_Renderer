@@ -56,23 +56,23 @@ int main(int argc, char* argv[])
     glwindow.creatProgram();
 
     //Cube1
-    glwindow.createVAO();
+    myCube1.vaoIndex = glwindow.createVAO();
     glwindow.createVBO(myCube1.vertexByteSize, myCube1.vertexData);
     glwindow.createEBO(myCube1.indexByteSize, myCube1.indexData);
-    glwindow.setVertexAttribPtr(0,3,sizeof(Vertex), 0);
-    glwindow.setVertexAttribPtr(1,3,sizeof(Vertex), 3 * sizeof(GLfloat));
-    glwindow.setVertexAttribPtr(2,3,sizeof(Vertex), 6 * sizeof(GLfloat));
+    vector<glm::ivec3> attribList = {glm::ivec3(0,3,0), glm::ivec3(1,3,3), glm::ivec3(2,3,6)};
+    glwindow.setMultipleAttribPtr(attribList);
     glwindow.unbindVAO(0);
 
     //Normals
-    glwindow.createVAO();
+    myNorms1.vaoIndex = glwindow.createVAO();
     glwindow.createVBO(myNorms1.vertexByteSize, myNorms1.vertexData);
     glwindow.createEBO(myNorms1.indexByteSize, myNorms1.indexData);
-    glwindow.setVertexAttribPtr(0,3,sizeof(Vertex), 0);
+    attribList = vector<glm::ivec3>{glm::ivec3(0,3,0), glm::ivec3(1,3,3), glm::ivec3(2,3,6)};
+    glwindow.setMultipleAttribPtr(attribList);
     glwindow.unbindVAO(1);
 
     //ImportShape
-    glwindow.createVAO();
+    myImport1.vaoIndex = glwindow.createVAO();
     glwindow.createVBO(myImport1.vertexByteSize, myImport1.vertexData);
     glwindow.createEBO(myImport1.indexByteSize, myImport1.indexData);
     int width, height, nChannel;
@@ -81,12 +81,9 @@ int main(int argc, char* argv[])
     GLenum colorType = nChannel == 3 ? GL_RGB : GL_RGBA;
     glwindow.createTexO(width, height, colorType, texData);
     stbi_image_free(texData);
-    glwindow.setVertexAttribPtr(0,3,sizeof(Vertex), 0);
-    glwindow.setVertexAttribPtr(1,3,sizeof(Vertex), 3 * sizeof(GLfloat));
-    glwindow.setVertexAttribPtr(2,3,sizeof(Vertex), 6 * sizeof(GLfloat));
-    glwindow.setVertexAttribPtr(3,2,sizeof(Vertex), 9 * sizeof(GLfloat));
+    attribList = vector<glm::ivec3>{glm::ivec3(0,3,0), glm::ivec3(1,3,3), glm::ivec3(2,3,6), glm::ivec3(3,2,9)};
+    glwindow.setMultipleAttribPtr(attribList);
     glwindow.unbindVAO(2);
-
 
     //Normals
     glwindow.createVAO();
@@ -110,21 +107,20 @@ int main(int argc, char* argv[])
 
         glViewport(0,0, width, height);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-	    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         glCullFace(GL_BACK);
         glwindow.getPollingUpdate();
 
-        glwindow.bindVAO(0);
+        glwindow.bindVAO(myCube1.vaoIndex);
         mat4 modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f,0.0f,30.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
-        glwindow.bindVAO(0);
         glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
-        glwindow.bindVAO(1);
+        glwindow.bindVAO(myNorms1.vaoIndex);
         glDrawArrays(GL_LINES, 0, myNorms1.numVertices);
 
-        glwindow.bindVAO(2);
+        glwindow.bindVAO(myImport1.vaoIndex);
         GLint texLoc = glGetUniformLocation(glwindow.programID, "texture0");
         glUniform1i(texLoc, 0);
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, -10.0f, -10.0f), glm::vec3(-90.0f,180.0f,0.0f));
@@ -143,7 +139,7 @@ int main(int argc, char* argv[])
         //absolutely necessary otherwise you get unclosable transparent window that hogs resources
         glfwPollEvents();
     }
-    //
+
     myCube1.cleanUP();
     myNorms1.cleanUP();
     myImport1.cleanUP();

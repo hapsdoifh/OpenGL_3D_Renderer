@@ -12,6 +12,9 @@ using glm::vec3;
 using glm::mat3;
 using glm::mat4;
 
+using std::vector;
+using std::string;
+
 enum updateType {
 	noUpdate = 0b00,
 	keyUpdate = 0b01,
@@ -54,11 +57,12 @@ public:
 	void createEBO(GLuint size, GLuint* indexData); //Element Buffer Object
 	void createTexO(int width, int height, GLenum colorType, unsigned char* data);
 	void createShaders();
-	void createVAO();
+	GLuint createVAO();
 	void bindVAO(int index);
 	void unbindVAO(int index);
 
 	void setVertexAttribPtr(GLuint attribLayoutLoc, GLint attribSize, GLint stride, int offset, GLenum dataType=GL_FLOAT, GLenum normalized=GL_FALSE);
+	void setMultipleAttribPtr(vector<glm::ivec3> attribList);
 	GLuint compileShader(GLuint shaderID, std::string shaderPath);
 	void compileShaders(std::string vshaderPath="VertexShaderCode.glsl", std::string fshaderPath="FragmentShaderCode.glsl");
 	void creatProgram();

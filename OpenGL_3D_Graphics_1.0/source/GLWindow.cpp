@@ -47,11 +47,12 @@ void GLWindow::createEBO(GLuint size, GLuint* indexDataPtr = nullptr) {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, (void*)indexDataPtr,GL_STATIC_DRAW);
 }
 
-void GLWindow::createVAO() {
+GLuint GLWindow::createVAO() {
     GLuint tempVAO;
     glGenVertexArrays(1, &tempVAO);
     glBindVertexArray(tempVAO);
     vertexArrayIDs.push_back(tempVAO);
+    return vertexArrayIDs.size() - 1;
 }
 
 void GLWindow::bindVAO(int index) {
@@ -71,6 +72,13 @@ void GLWindow::unbindVAO(int index) {
         std::cout << "VAO list size is: " << vertexArrayIDs.size();
     }
 }
+
+void GLWindow::setMultipleAttribPtr(vector<glm::ivec3> attribList) {
+    for(glm::ivec3 &It : attribList) {
+        setVertexAttribPtr(It.x, It.y, sizeof(Vertex), It.z * sizeof(GLfloat));
+    }
+}
+
 
 void GLWindow::createTexO(int width, int height, GLenum colorType, unsigned char *data) {
     GLuint tempTexID;

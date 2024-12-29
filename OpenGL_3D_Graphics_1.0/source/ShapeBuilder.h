@@ -32,6 +32,7 @@ class ShapeBuilder {
 public:
     ShapeBuilder();
     ~ShapeBuilder();
+    GLuint vaoIndex;
     GLuint numVertices;
     GLuint vertexByteSize;
     GLuint numIndices;
