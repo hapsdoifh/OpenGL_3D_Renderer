@@ -14,15 +14,15 @@ void ShapeBuilder::buildCube(GLfloat sideLengthScale, glm::vec3 color) {
 
     //This is still a right-handed coordinate system so 1 will be closer than -1 once loaded in (in -z no rotation)
     Vertex cubeVerts[] {
-        sideLengthScale * glm::vec3(-1.0f, 1.0f, 1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
-        sideLengthScale * glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
-        sideLengthScale * glm::vec3(-1.0f, -1.0f,1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
-        sideLengthScale * glm::vec3(1.0f, -1.0f, 1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, 1.0f, 1.0f), color, glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, 1.0f, 1.0f), color, glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, -1.0f,1.0f), color, glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, -1.0f, 1.0f), color, glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
 
-        sideLengthScale * glm::vec3(-1.0f, 1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
-        sideLengthScale * glm::vec3(1.0f, 1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
-        sideLengthScale * glm::vec3(-1.0f, -1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
-        sideLengthScale * glm::vec3(1.0f, -1.0f, -1.0f),  glm::vec3(0.0,0.5,0.0), glm::vec3(0.0,0.0,0.0),  glm::vec2(0.0,0.0)
+        sideLengthScale * glm::vec3(-1.0f, 1.0f, -1.0f), color, glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, 1.0f, -1.0f), color, glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(-1.0f, -1.0f, -1.0f), color, glm::vec3(0.0,0.0,0.0), glm::vec2(0.0,0.0),
+        sideLengthScale * glm::vec3(1.0f, -1.0f, -1.0f), color, glm::vec3(0.0,0.0,0.0),  glm::vec2(0.0,0.0)
     };
 
 
@@ -198,7 +198,7 @@ void ShapeBuilder::importShape(std::string path) {
             if(!texList.empty())
                 tempVert.texture = texList[texInd - 1];
 
-            tempVert.color = vec3(1.0,1.0,1.0f);
+            tempVert.color = vec3(0.0,0.0,0.0f);
             tempVertList.push_back(tempVert);
         }
     }

@@ -38,17 +38,7 @@ int main(int argc, char* argv[])
     // const GLubyte* vendor = glGetString(GL_VENDOR);
 
     GLWindow glwindow;
-    ShapeBuilder myCube1;
-    myCube1.buildCube(1.0f);
 
-    ShapeBuilder myNorms1;
-    myNorms1.buildNormals(myCube1);
-
-    ShapeBuilder myImport1;
-    myImport1.importShape("180212_Erik_XIV_Rustning_2.obj");
-
-    ShapeBuilder myNorms2;
-    myNorms2.buildNormals(myImport1);
 
     glwindow.createShaders();
     glwindow.compileShaders();
@@ -56,6 +46,9 @@ int main(int argc, char* argv[])
     glwindow.creatProgram();
 
     //Cube1
+    ShapeBuilder myCube1;
+    myCube1.buildCube(1.0f, vec3(0.0,1.0f,1.0f));
+
     myCube1.vaoIndex = glwindow.createVAO();
     glwindow.createVBO(myCube1.vertexByteSize, myCube1.vertexData);
     glwindow.createEBO(myCube1.indexByteSize, myCube1.indexData);
@@ -64,6 +57,9 @@ int main(int argc, char* argv[])
     glwindow.unbindVAO(0);
 
     //Normals
+    ShapeBuilder myNorms1;
+    myNorms1.buildNormals(myCube1);
+
     myNorms1.vaoIndex = glwindow.createVAO();
     glwindow.createVBO(myNorms1.vertexByteSize, myNorms1.vertexData);
     glwindow.createEBO(myNorms1.indexByteSize, myNorms1.indexData);
@@ -72,6 +68,9 @@ int main(int argc, char* argv[])
     glwindow.unbindVAO(1);
 
     //ImportShape
+    ShapeBuilder myImport1;
+    myImport1.importShape("180212_Erik_XIV_Rustning_2.obj");
+
     myImport1.vaoIndex = glwindow.createVAO();
     glwindow.createVBO(myImport1.vertexByteSize, myImport1.vertexData);
     glwindow.createEBO(myImport1.indexByteSize, myImport1.indexData);
@@ -86,12 +85,24 @@ int main(int argc, char* argv[])
     glwindow.unbindVAO(2);
 
     //Normals
+    ShapeBuilder myNorms2;
+    myNorms2.buildNormals(myImport1);
+
     glwindow.createVAO();
     glwindow.createVBO(myNorms2.vertexByteSize, myNorms2.vertexData);
     glwindow.createEBO(myNorms2.indexByteSize, myNorms2.indexData);
     glwindow.setVertexAttribPtr(0,3,sizeof(Vertex), 0);
     glwindow.unbindVAO(3);
 
+    //Light Source
+    ShapeBuilder myLight1;
+    myLight1.buildCube(1.0f);
+
+    myLight1.vaoIndex = glwindow.createVAO();
+    glwindow.createVBO(myLight1.vertexByteSize, myLight1.vertexData);
+    glwindow.createEBO(myLight1.indexByteSize, myLight1.indexData);
+    attribList = vector<glm::ivec3>{glm::ivec3(0,3,0), glm::ivec3(1,3,3), glm::ivec3(2,3,6)};
+    glwindow.setMultipleAttribPtr(attribList);
 
     glwindow.createShaders();
     glwindow.compileShaders();
@@ -134,6 +145,10 @@ int main(int argc, char* argv[])
         // glwindow.bindVAO(3);
         // glDrawArrays(GL_LINES, 0, myNorms2.numVertices);
 
+        glwindow.bindVAO(myLight1.vaoIndex);
+        modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 50.0f, 0.0f), glm::vec3(0.0f,0.0f,0.0f));
+        glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
+        glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
         glfwSwapBuffers(myWindow);
         //absolutely necessary otherwise you get unclosable transparent window that hogs resources

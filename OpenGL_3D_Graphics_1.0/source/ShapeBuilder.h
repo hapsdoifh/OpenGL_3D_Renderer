@@ -39,7 +39,7 @@ public:
     GLuint indexByteSize;
     Vertex* vertexData;
     GLuint* indexData;
-    void buildCube(GLfloat sideLengthScale=1.0f, glm::vec3 color=glm::vec3(0,0,0));
+    void buildCube(GLfloat sideLengthScale=1.0f, glm::vec3 color=glm::vec3(1.0f,1.0f,1.0f));
     void buildNormals(ShapeBuilder& srcShape);
     std::vector<std::string> splitFileLine(std::string fileLine);
     void fileImportParallel(string& fileStr, long start, long end, std::string newLine,

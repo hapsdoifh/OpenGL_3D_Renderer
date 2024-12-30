@@ -24,7 +24,6 @@ void main(){
     vec3 lightDir = normalize(lightPos - vec3(modelWorldMat*v));
     float intensity = max(dot(transformedNorm, lightDir),0.0f);
     theColor = (intensity + ambient)*Color;
-    //theColor = vec3(1.0,1.0,1.0);
     lightLevel = intensity;
     texCoord = Texture;
 }
