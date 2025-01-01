@@ -21,6 +21,7 @@ int main(int argc, char* argv[])
     glfwSetKeyCallback(myWindow, &GLWindow::handleKeyCallback);
     glfwSetCursorPosCallback(myWindow, &GLWindow::handleMouseCallback);
     glfwSetMouseButtonCallback(myWindow, &GLWindow::handleMouseBtnCallback);
+
     // std::cout << gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     // if(!myWindow) {
     //     glfwTerminate();
@@ -33,9 +34,9 @@ int main(int argc, char* argv[])
 
     gladLoadGL(); //doesn't work without this line
 
-    // const GLubyte* version = glGetString(GL_VERSION);
-    // const GLubyte* renderer = glGetString(GL_RENDERER);
-    // const GLubyte* vendor = glGetString(GL_VENDOR);
+    const GLubyte* version = glGetString(GL_VERSION);
+    const GLubyte* renderer = glGetString(GL_RENDERER);
+    const GLubyte* vendor = glGetString(GL_VENDOR);
 
     GLWindow glwindow;
 
@@ -127,19 +128,17 @@ int main(int argc, char* argv[])
         mat4 modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f,0.0f,30.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
         glwindow.drawShape(myCube1, 0);
-        // glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
         glwindow.bindVAO(myNorms1.vaoIndex);
         glwindow.drawShape(myNorms1, 1, GL_LINES);
-        // glDrawArrays(GL_LINES, 0, myNorms1.numVertices);
 
         glwindow.bindVAO(myImport1.vaoIndex);
-        GLint texLoc = glGetUniformLocation(glwindow.programID, "texture0");
-        glUniform1i(texLoc, 0);
+        // GLint texLoc = glGetUniformLocation(glwindow.programID, "texture0");
+        // glUniform1i(texLoc, 0);
+        glwindow.sendUniformData(glwindow.programID, "texture0", 0);
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, -10.0f, -10.0f), glm::vec3(-90.0f,180.0f,0.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
         glwindow.drawShape(myImport1, 0);
-        // glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, -10.0f, 10.0f), glm::vec3(-90.0f,0.0f,0.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
@@ -154,6 +153,7 @@ int main(int argc, char* argv[])
         glwindow.drawShape(myLight1, 0);
 
         glfwSwapBuffers(myWindow);
+
         //absolutely necessary otherwise you get unclosable transparent window that hogs resources
         glfwPollEvents();
     }

@@ -76,6 +76,10 @@ public:
 
 	mat4 generateMovementMat(vec3 position, vec3 rotation);
 	void sendUniformComponents(int width, int height, glm::mat4 = mat4(1.0f), GLfloat FOV = 60.0f);
+
+	template <typename T>
+	void sendUniformData(int dataType, const char* dataName, T data);
+
 	void drawShape(ShapeBuilder& srcShape, int drawMethod, GLenum drawType = GL_TRIANGLES);
 	void cleanUP();
 };

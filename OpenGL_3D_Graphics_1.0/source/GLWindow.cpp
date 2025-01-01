@@ -257,6 +257,25 @@ void GLWindow::drawShape(ShapeBuilder &srcShape, int drawMethod, GLenum drawType
     }
 }
 
+template <typename T>
+void GLWindow::sendUniformData(int dataType, const char* dataName, T data) {
+    GLint uniformLoc = glGetUniformLocation(programID,dataName);
+    switch(dataType) {
+        case(0):
+            glUniform1i(uniformLoc, data);
+        break;
+        case(1):
+            glUniform3fv(uniformLoc, 1, (GLfloat*)(&data));
+        break;
+        case(2):
+            glUniformMatrix4fv(uniformLoc, 1, GL_FALSE, (GLfloat*)(&data));
+        break;
+    }
+}
+
+template void GLWindow::sendUniformData<int>(int dataType, const char* dataName, int);
+template void GLWindow::sendUniformData<GLfloat>(int dataType, const char* dataName, GLfloat);
+
 
 void GLWindow::cleanUP() {
     //TODO: implement cleanup
