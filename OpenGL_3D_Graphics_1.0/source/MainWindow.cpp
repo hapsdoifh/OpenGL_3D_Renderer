@@ -126,21 +126,24 @@ int main(int argc, char* argv[])
         glwindow.bindVAO(myCube1.vaoIndex);
         mat4 modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f,0.0f,30.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
-        glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
+        glwindow.drawShape(myCube1, 0);
+        // glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
         glwindow.bindVAO(myNorms1.vaoIndex);
-        glDrawArrays(GL_LINES, 0, myNorms1.numVertices);
+        glwindow.drawShape(myNorms1, 1, GL_LINES);
+        // glDrawArrays(GL_LINES, 0, myNorms1.numVertices);
 
         glwindow.bindVAO(myImport1.vaoIndex);
         GLint texLoc = glGetUniformLocation(glwindow.programID, "texture0");
         glUniform1i(texLoc, 0);
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, -10.0f, -10.0f), glm::vec3(-90.0f,180.0f,0.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
-        glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
+        glwindow.drawShape(myImport1, 0);
+        // glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
 
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, -10.0f, 10.0f), glm::vec3(-90.0f,0.0f,0.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
-        glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
+        glwindow.drawShape(myImport1, 0);
 
         // glwindow.bindVAO(3);
         // glDrawArrays(GL_LINES, 0, myNorms2.numVertices);
@@ -148,7 +151,7 @@ int main(int argc, char* argv[])
         glwindow.bindVAO(myLight1.vaoIndex);
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 50.0f, 0.0f), glm::vec3(0.0f,0.0f,0.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
-        glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
+        glwindow.drawShape(myLight1, 0);
 
         glfwSwapBuffers(myWindow);
         //absolutely necessary otherwise you get unclosable transparent window that hogs resources

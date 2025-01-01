@@ -61,8 +61,9 @@ public:
 	void bindVAO(int index);
 	void unbindVAO(int index);
 
-	void setVertexAttribPtr(GLuint attribLayoutLoc, GLint attribSize, GLint stride, int offset, GLenum dataType=GL_FLOAT, GLenum normalized=GL_FALSE);
+	void setVertexAttribPtr(GLuint attribLayoutLoc, GLint attribSize, GLint stride, long offset, GLenum dataType=GL_FLOAT, GLenum normalized=GL_FALSE);
 	void setMultipleAttribPtr(vector<glm::ivec3> attribList);
+
 	GLuint compileShader(GLuint shaderID, std::string shaderPath);
 	void compileShaders(std::string vshaderPath="VertexShaderCode.glsl", std::string fshaderPath="FragmentShaderCode.glsl");
 	void creatProgram();
@@ -75,5 +76,6 @@ public:
 
 	mat4 generateMovementMat(vec3 position, vec3 rotation);
 	void sendUniformComponents(int width, int height, glm::mat4 = mat4(1.0f), GLfloat FOV = 60.0f);
+	void drawShape(ShapeBuilder& srcShape, int drawMethod, GLenum drawType = GL_TRIANGLES);
 	void cleanUP();
 };

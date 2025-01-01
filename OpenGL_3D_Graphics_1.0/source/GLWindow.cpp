@@ -111,7 +111,7 @@ bool GLWindow::readShaderFile(const std::string &path, std::string &dest) {
     return false;
 }
 
-void GLWindow::setVertexAttribPtr(GLuint attribLayoutLoc, GLint attribSize, GLint stride, int offset, GLenum dataType, GLenum normalized) {
+void GLWindow::setVertexAttribPtr(GLuint attribLayoutLoc, GLint attribSize, GLint stride, long offset, GLenum dataType, GLenum normalized) {
     glEnableVertexAttribArray(attribLayoutLoc);
     glVertexAttribPointer(attribLayoutLoc, attribSize, dataType, normalized, stride, (void*)offset);
 }
@@ -245,6 +245,18 @@ void GLWindow::getPollingUpdate() {
     if(pollUpdate & mouseBtnUpdate)
         myCam.cameraUpdateMouseBtn(pollMouseBtn, pollMouseBtnAction);
 }
+
+void GLWindow::drawShape(ShapeBuilder &srcShape, int drawMethod, GLenum drawType) {
+    switch(drawMethod) {
+        case(0):
+            glDrawElements(drawType, srcShape.numIndices, GL_UNSIGNED_INT, (void*)0);
+        break;
+        case(1):
+            glDrawArrays(drawType, 0, srcShape.numVertices);
+        break;
+    }
+}
+
 
 void GLWindow::cleanUP() {
     //TODO: implement cleanup
