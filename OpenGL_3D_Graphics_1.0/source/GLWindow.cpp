@@ -196,6 +196,8 @@ void GLWindow::sendUniformComponents(int width, int height, mat4 modelWorldMat, 
 
     vec3 ambient(0.1f,0.1f,0.1f);
     sendUniformData(UNI_3FV, "ambient",ambient[0]);
+
+    sendUniformData(UNI_3FV, "viewPos", myCam.getPos()[0]);
 }
 
 void GLWindow::handleKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {

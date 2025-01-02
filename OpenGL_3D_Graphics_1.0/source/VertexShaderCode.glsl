@@ -18,6 +18,7 @@ out vec2 texCoord;
 out vec3 transformedNorm;
 out vec3 lightDir;
 
+out vec3 fragPosition;
 
 void main(){
     vec4 v = vec4(position, 1.0);
@@ -27,7 +28,7 @@ void main(){
     lightDir = normalize(lightPos - vec3(modelWorldMat*v));
 
     theColor = Color;
-
     gl_Position = viewProjMat * modelWorldMat * v;
+    fragPosition = vec3(gl_Position);
     texCoord = Texture;
 }

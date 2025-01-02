@@ -5,9 +5,11 @@ in vec2 texCoord;
 
 in vec3 transformedNorm;
 in vec3 lightDir;
+in vec3 fragPosition;
 
 uniform bool disableLight;
 uniform vec3 ambient;
+uniform vec3 viewPos;
 
 uniform sampler2D texture0;
 
@@ -22,7 +24,10 @@ void main(){
     if(disableLight)
         return;
 
-    float intensity = max(dot(lightDir, transformedNorm), 0.0f);
-    fragColor = fragColor * (vec4(intensity) + vec4(ambient, 0.0));
+    vec3 viewDir = normalize(fragPosition - viewPos);
+    vec3 reflected = reflect(-lightDir, transformedNorm);
+    float specularLight = 1 * pow(max(dot(reflected, viewDir),0), 32);
+    float diffuseLight = max(dot(lightDir, transformedNorm), 0.0f);
+    fragColor = fragColor * (specularLight + vec4(diffuseLight) + vec4(ambient, 0.0));
 }
 

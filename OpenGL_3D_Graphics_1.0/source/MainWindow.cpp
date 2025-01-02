@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
     }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    GLFWwindow* myWindow = glfwCreateWindow(900, 600, "OpenGL_Window", NULL, NULL);
+    GLFWwindow* myWindow = glfwCreateWindow(1920, 1080, "OpenGL_Window", NULL, NULL);
     glfwMakeContextCurrent(myWindow);
     glfwSwapInterval(1);
 
