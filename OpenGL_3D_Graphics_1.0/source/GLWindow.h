@@ -22,6 +22,12 @@ enum updateType {
 	mouseBtnUpdate = 0b100
 };
 
+enum glUnifromType {
+	UNI_1I = 0b00,
+	UNI_3FV = 0b01,
+	UNI_M4FV = 0b10,
+};
+
 class GLWindow{
 
 	GLuint vertexShaderID;
@@ -78,7 +84,7 @@ public:
 	void sendUniformComponents(int width, int height, glm::mat4 = mat4(1.0f), GLfloat FOV = 60.0f);
 
 	template <typename T>
-	void sendUniformData(int dataType, const char* dataName, T data);
+	void sendUniformData(int dataType, const char* dataName, T& data);
 
 	void drawShape(ShapeBuilder& srcShape, int drawMethod, GLenum drawType = GL_TRIANGLES);
 	void cleanUP();

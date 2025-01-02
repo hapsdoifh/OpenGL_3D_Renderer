@@ -187,19 +187,15 @@ void GLWindow::sendUniformComponents(int width, int height, mat4 modelWorldMat, 
     mat4 viewMat = myCam.worldToCamMatrix();
     mat4 viewProjMat = projMat * viewMat;
 
-    GLint viewProjMatLoc = glGetUniformLocation(programID, "viewProjMat");
-    glUniformMatrix4fv(viewProjMatLoc, 1, GL_FALSE, &viewProjMat[0][0]);
+    sendUniformData(UNI_M4FV,"viewProjMat", viewProjMat[0][0]);
 
-    GLint modelWorldMatLoc = glGetUniformLocation(programID, "modelWorldMat");
-    glUniformMatrix4fv(modelWorldMatLoc, 1, GL_FALSE, &modelWorldMat[0][0]);
+    sendUniformData(UNI_M4FV, "modelWorldMat",modelWorldMat[0][0]);
 
-    GLint lightPosLoc = glGetUniformLocation(programID, "lightPos");
-    vec3 lightPos(10.0f,50.0f,0.0f);
-    glUniform3fv(lightPosLoc, 1, &lightPos[0]);
+    vec3 lightPos(0.0f,50.0f,0.0f);
+    sendUniformData(UNI_3FV, "lightPos",lightPos[0]);
 
-    GLint ambientLoc = glGetUniformLocation(programID, "ambient");
-    vec3 ambient(0.2f,0.2f,0.2f);
-    glUniform3fv(ambientLoc, 1, &ambient[0]);
+    vec3 ambient(0.1f,0.1f,0.1f);
+    sendUniformData(UNI_3FV, "ambient",ambient[0]);
 }
 
 void GLWindow::handleKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -258,23 +254,23 @@ void GLWindow::drawShape(ShapeBuilder &srcShape, int drawMethod, GLenum drawType
 }
 
 template <typename T>
-void GLWindow::sendUniformData(int dataType, const char* dataName, T data) {
+void GLWindow::sendUniformData(int dataType, const char* dataName, T& data) {
     GLint uniformLoc = glGetUniformLocation(programID,dataName);
     switch(dataType) {
-        case(0):
+        case(UNI_1I):
             glUniform1i(uniformLoc, data);
         break;
-        case(1):
+        case(UNI_3FV):
             glUniform3fv(uniformLoc, 1, (GLfloat*)(&data));
         break;
-        case(2):
+        case(UNI_M4FV):
             glUniformMatrix4fv(uniformLoc, 1, GL_FALSE, (GLfloat*)(&data));
         break;
     }
 }
 
-template void GLWindow::sendUniformData<int>(int dataType, const char* dataName, int);
-template void GLWindow::sendUniformData<GLfloat>(int dataType, const char* dataName, GLfloat);
+template void GLWindow::sendUniformData<int>(int dataType, const char* dataName, int&);
+template void GLWindow::sendUniformData<GLfloat>(int dataType, const char* dataName, GLfloat&);
 
 
 void GLWindow::cleanUP() {

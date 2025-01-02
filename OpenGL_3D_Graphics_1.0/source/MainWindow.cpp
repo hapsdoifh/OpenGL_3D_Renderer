@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
     }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    GLFWwindow* myWindow = glfwCreateWindow(640, 480, "OpenGL_Window", NULL, NULL);
+    GLFWwindow* myWindow = glfwCreateWindow(900, 600, "OpenGL_Window", NULL, NULL);
     glfwMakeContextCurrent(myWindow);
     glfwSwapInterval(1);
 
@@ -125,6 +125,8 @@ int main(int argc, char* argv[])
         glwindow.getPollingUpdate();
 
         glwindow.bindVAO(myCube1.vaoIndex);
+        int lightOff = 0;
+        glwindow.sendUniformData(UNI_1I, "disableLight", lightOff);
         mat4 modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f,0.0f,30.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
         glwindow.drawShape(myCube1, 0);
@@ -133,9 +135,8 @@ int main(int argc, char* argv[])
         glwindow.drawShape(myNorms1, 1, GL_LINES);
 
         glwindow.bindVAO(myImport1.vaoIndex);
-        // GLint texLoc = glGetUniformLocation(glwindow.programID, "texture0");
-        // glUniform1i(texLoc, 0);
-        glwindow.sendUniformData(glwindow.programID, "texture0", 0);
+        int texSel = 0;
+        glwindow.sendUniformData(UNI_1I, "texture0", texSel);
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, -10.0f, -10.0f), glm::vec3(-90.0f,180.0f,0.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
         glwindow.drawShape(myImport1, 0);
@@ -148,6 +149,8 @@ int main(int argc, char* argv[])
         // glDrawArrays(GL_LINES, 0, myNorms2.numVertices);
 
         glwindow.bindVAO(myLight1.vaoIndex);
+        lightOff = 1;
+        glwindow.sendUniformData(UNI_1I, "disableLight", lightOff);
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 50.0f, 0.0f), glm::vec3(0.0f,0.0f,0.0f));
         glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
         glwindow.drawShape(myLight1, 0);
