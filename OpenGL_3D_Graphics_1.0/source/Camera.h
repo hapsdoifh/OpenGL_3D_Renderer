@@ -20,6 +20,7 @@ public:
     void cameraUpdateMouse(double x, double y);
     void cameraUpdateMouseBtn(int button, int action);
     void cameraUpdateKeyboard(int key, glm::vec3 action);
+    glm::vec3 getPos() const {return cameraPos;}
     glm::mat4 worldToCamMatrix();
 };
 

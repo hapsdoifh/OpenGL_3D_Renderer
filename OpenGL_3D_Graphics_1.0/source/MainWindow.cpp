@@ -4,6 +4,7 @@
 #include <GLWindow.h>
 #include <ShapeBuilder.h>
 #include <glfw3.h>
+#include <stb_image.h>
 
 int main(int argc, char* argv[])
 {
@@ -13,13 +14,14 @@ int main(int argc, char* argv[])
     }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    GLFWwindow* myWindow = glfwCreateWindow(640, 480, "OpenGL_Window", NULL, NULL);
+    GLFWwindow* myWindow = glfwCreateWindow(1920, 1080, "OpenGL_Window", NULL, NULL);
     glfwMakeContextCurrent(myWindow);
     glfwSwapInterval(1);
 
     glfwSetKeyCallback(myWindow, &GLWindow::handleKeyCallback);
     glfwSetCursorPosCallback(myWindow, &GLWindow::handleMouseCallback);
     glfwSetMouseButtonCallback(myWindow, &GLWindow::handleMouseBtnCallback);
+
     // std::cout << gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     // if(!myWindow) {
     //     glfwTerminate();
@@ -32,22 +34,12 @@ int main(int argc, char* argv[])
 
     gladLoadGL(); //doesn't work without this line
 
-    // const GLubyte* version = glGetString(GL_VERSION);
-    // const GLubyte* renderer = glGetString(GL_RENDERER);
-    // const GLubyte* vendor = glGetString(GL_VENDOR);
+    const GLubyte* version = glGetString(GL_VERSION);
+    const GLubyte* renderer = glGetString(GL_RENDERER);
+    const GLubyte* vendor = glGetString(GL_VENDOR);
 
     GLWindow glwindow;
-    ShapeBuilder myCube1;
-    myCube1.buildCube(1.0f);
 
-    ShapeBuilder myNorms1;
-    myNorms1.buildNormals(myCube1);
-
-    ShapeBuilder myImport1;
-    myImport1.importShape("180212_Erik_XIV_Rustning_2.obj");
-
-    ShapeBuilder myNorms2;
-    myNorms2.buildNormals(myImport1);
 
     glwindow.createShaders();
     glwindow.compileShaders();
@@ -55,46 +47,70 @@ int main(int argc, char* argv[])
     glwindow.creatProgram();
 
     //Cube1
-    glwindow.createVAO();
+    ShapeBuilder myCube1;
+    myCube1.buildCube(1.0f, vec3(0.0,1.0f,1.0f));
+
+    myCube1.vaoIndex = glwindow.createVAO();
     glwindow.createVBO(myCube1.vertexByteSize, myCube1.vertexData);
     glwindow.createEBO(myCube1.indexByteSize, myCube1.indexData);
-    glwindow.setVertexAttribPtr(0,3,9 * sizeof(GLfloat), 0);
-    glwindow.setVertexAttribPtr(1,3,9 * sizeof(GLfloat), 3 * sizeof(GLfloat));
-    glwindow.setVertexAttribPtr(2,3,9 * sizeof(GLfloat), 6 * sizeof(GLfloat));
+    vector<glm::ivec3> attribList = {glm::ivec3(0,3,0), glm::ivec3(1,3,3), glm::ivec3(2,3,6)};
+    glwindow.setMultipleAttribPtr(attribList);
     glwindow.unbindVAO(0);
 
     //Normals
-    glwindow.createVAO();
+    ShapeBuilder myNorms1;
+    myNorms1.buildNormals(myCube1);
+
+    myNorms1.vaoIndex = glwindow.createVAO();
     glwindow.createVBO(myNorms1.vertexByteSize, myNorms1.vertexData);
     glwindow.createEBO(myNorms1.indexByteSize, myNorms1.indexData);
-    glwindow.setVertexAttribPtr(0,3,9 * sizeof(GLfloat), 0);
+    attribList = vector<glm::ivec3>{glm::ivec3(0,3,0), glm::ivec3(1,3,3), glm::ivec3(2,3,6)};
+    glwindow.setMultipleAttribPtr(attribList);
     glwindow.unbindVAO(1);
 
-    //ImportCube
-    glwindow.createVAO();
+    //ImportShape
+    ShapeBuilder myImport1;
+    myImport1.importShape("180212_Erik_XIV_Rustning_2.obj");
+
+    myImport1.vaoIndex = glwindow.createVAO();
     glwindow.createVBO(myImport1.vertexByteSize, myImport1.vertexData);
     glwindow.createEBO(myImport1.indexByteSize, myImport1.indexData);
-    glwindow.setVertexAttribPtr(0,3,9*sizeof(GLfloat), 0);
-    glwindow.setVertexAttribPtr(1,3,9*sizeof(GLfloat), 3 * sizeof(GLfloat));
-    glwindow.setVertexAttribPtr(2,3,9*sizeof(GLfloat), 6 * sizeof(GLfloat));
+    int width, height, nChannel;
+    unsigned char* texData = stbi_load("180212_Erik_XIV_Rustning_2_u1_v1.png", &width, &height, &nChannel, 0);
+
+    GLenum colorType = nChannel == 3 ? GL_RGB : GL_RGBA;
+    glwindow.createTexO(width, height, colorType, texData);
+    stbi_image_free(texData);
+    attribList = vector<glm::ivec3>{glm::ivec3(0,3,0), glm::ivec3(1,3,3), glm::ivec3(2,3,6), glm::ivec3(3,2,9)};
+    glwindow.setMultipleAttribPtr(attribList);
     glwindow.unbindVAO(2);
 
-
     //Normals
+    ShapeBuilder myNorms2;
+    myNorms2.buildNormals(myImport1);
+
     glwindow.createVAO();
     glwindow.createVBO(myNorms2.vertexByteSize, myNorms2.vertexData);
     glwindow.createEBO(myNorms2.indexByteSize, myNorms2.indexData);
-    glwindow.setVertexAttribPtr(0,3,9 * sizeof(GLfloat), 0);
+    glwindow.setVertexAttribPtr(0,3,sizeof(Vertex), 0);
     glwindow.unbindVAO(3);
 
+    //Light Source
+    ShapeBuilder myLight1;
+    myLight1.buildCube(1.0f);
+
+    myLight1.vaoIndex = glwindow.createVAO();
+    glwindow.createVBO(myLight1.vertexByteSize, myLight1.vertexData);
+    glwindow.createEBO(myLight1.indexByteSize, myLight1.indexData);
+    attribList = vector<glm::ivec3>{glm::ivec3(0,3,0), glm::ivec3(1,3,3), glm::ivec3(2,3,6)};
+    glwindow.setMultipleAttribPtr(attribList);
 
     glwindow.createShaders();
     glwindow.compileShaders();
 
     glwindow.creatProgram();
     glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_CULL_FACE);
-    // glCullFace(GL_FRONT);
+    glEnable(GL_CULL_FACE);
 
     while(!glfwWindowShouldClose(myWindow)) {
         int width, height;
@@ -103,35 +119,48 @@ int main(int argc, char* argv[])
 
         glViewport(0,0, width, height);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-	    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-        // glCullFace(GL_BACK);
-        // glDrawArrays(GL_TRIANGLES, 0, 3);
+        glCullFace(GL_BACK);
         glwindow.getPollingUpdate();
 
+        glwindow.bindVAO(myCube1.vaoIndex);
+        int lightOff = 0;
+        glwindow.sendUniformData(UNI_1I, "disableLight", lightOff);
         mat4 modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f,0.0f,30.0f));
-        glwindow.sendUniformComponents(width, height, modWorldMat);
-        glwindow.bindVAO(0);
-        glDrawElements(GL_TRIANGLES, myCube1.numIndices, GL_UNSIGNED_INT, (void*)0);
+        glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
+        glwindow.drawShape(myCube1, 0);
 
-        glwindow.bindVAO(1);
-        glDrawArrays(GL_LINES, 0, myNorms1.numVertices);
+        glwindow.bindVAO(myNorms1.vaoIndex);
+        glwindow.drawShape(myNorms1, 1, GL_LINES);
 
-        glwindow.bindVAO(2);
+        glwindow.bindVAO(myImport1.vaoIndex);
+        int texSel = 0;
+        glwindow.sendUniformData(UNI_1I, "texture0", texSel);
         modWorldMat = glwindow.generateMovementMat(vec3(0.0f, -10.0f, -10.0f), glm::vec3(-90.0f,180.0f,0.0f));
-        glwindow.sendUniformComponents(width, height, modWorldMat);
-        glDrawElements(GL_TRIANGLES, myImport1.numIndices, GL_UNSIGNED_INT, (void*)0);
-        // glDrawArrays(GL_TRIANGLES, 0, myImport1.numVertices);
+        glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
+        glwindow.drawShape(myImport1, 0);
+
+        modWorldMat = glwindow.generateMovementMat(vec3(0.0f, -10.0f, 10.0f), glm::vec3(-90.0f,0.0f,0.0f));
+        glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
+        glwindow.drawShape(myImport1, 0);
 
         // glwindow.bindVAO(3);
         // glDrawArrays(GL_LINES, 0, myNorms2.numVertices);
 
+        glwindow.bindVAO(myLight1.vaoIndex);
+        lightOff = 1;
+        glwindow.sendUniformData(UNI_1I, "disableLight", lightOff);
+        modWorldMat = glwindow.generateMovementMat(vec3(0.0f, 50.0f, 0.0f), glm::vec3(0.0f,0.0f,0.0f));
+        glwindow.sendUniformComponents(width, height, modWorldMat,80.0f);
+        glwindow.drawShape(myLight1, 0);
 
         glfwSwapBuffers(myWindow);
+
         //absolutely necessary otherwise you get unclosable transparent window that hogs resources
         glfwPollEvents();
     }
-    //
+
     myCube1.cleanUP();
     myNorms1.cleanUP();
     myImport1.cleanUP();

@@ -47,11 +47,12 @@ void GLWindow::createEBO(GLuint size, GLuint* indexDataPtr = nullptr) {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, (void*)indexDataPtr,GL_STATIC_DRAW);
 }
 
-void GLWindow::createVAO() {
+GLuint GLWindow::createVAO() {
     GLuint tempVAO;
     glGenVertexArrays(1, &tempVAO);
     glBindVertexArray(tempVAO);
     vertexArrayIDs.push_back(tempVAO);
+    return vertexArrayIDs.size() - 1;
 }
 
 void GLWindow::bindVAO(int index) {
@@ -69,6 +70,26 @@ void GLWindow::unbindVAO(int index) {
     }else {
         std::cout << "VAO ID out of range, index is: " << index << std::endl;
         std::cout << "VAO list size is: " << vertexArrayIDs.size();
+    }
+}
+
+void GLWindow::setMultipleAttribPtr(vector<glm::ivec3> attribList) {
+    for(glm::ivec3 &It : attribList) {
+        setVertexAttribPtr(It.x, It.y, sizeof(Vertex), It.z * sizeof(GLfloat));
+    }
+}
+
+
+void GLWindow::createTexO(int width, int height, GLenum colorType, unsigned char *data) {
+    GLuint tempTexID;
+    glGenTextures(1,&tempTexID);
+    textureBufferIDs.push_back(tempTexID);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tempTexID);
+
+    if(data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, colorType, width, height, 0, colorType, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
     }
 }
 
@@ -90,7 +111,7 @@ bool GLWindow::readShaderFile(const std::string &path, std::string &dest) {
     return false;
 }
 
-void GLWindow::setVertexAttribPtr(GLuint attribLayoutLoc, GLint attribSize, GLint stride, int offset, GLenum dataType, GLenum normalized) {
+void GLWindow::setVertexAttribPtr(GLuint attribLayoutLoc, GLint attribSize, GLint stride, long offset, GLenum dataType, GLenum normalized) {
     glEnableVertexAttribArray(attribLayoutLoc);
     glVertexAttribPointer(attribLayoutLoc, attribSize, dataType, normalized, stride, (void*)offset);
 }
@@ -166,19 +187,17 @@ void GLWindow::sendUniformComponents(int width, int height, mat4 modelWorldMat, 
     mat4 viewMat = myCam.worldToCamMatrix();
     mat4 viewProjMat = projMat * viewMat;
 
-    GLint viewProjMatLoc = glGetUniformLocation(programID, "viewProjMat");
-    glUniformMatrix4fv(viewProjMatLoc, 1, GL_FALSE, &viewProjMat[0][0]);
+    sendUniformData(UNI_M4FV,"viewProjMat", viewProjMat[0][0]);
 
-    GLint modelWorldMatLoc = glGetUniformLocation(programID, "modelWorldMat");
-    glUniformMatrix4fv(modelWorldMatLoc, 1, GL_FALSE, &modelWorldMat[0][0]);
+    sendUniformData(UNI_M4FV, "modelWorldMat",modelWorldMat[0][0]);
 
-    GLint lightPosLoc = glGetUniformLocation(programID, "lightPos");
-    vec3 lightPos(10.0f,6.0f,0.0f);
-    glUniform3fv(lightPosLoc, 1, &lightPos[0]);
+    vec3 lightPos(0.0f,50.0f,0.0f);
+    sendUniformData(UNI_3FV, "lightPos",lightPos[0]);
 
-    GLint ambientLoc = glGetUniformLocation(programID, "ambient");
-    vec3 ambient(0.2f,0.2f,0.2f);
-    glUniform3fv(ambientLoc, 1, &ambient[0]);
+    vec3 ambient(0.1f,0.1f,0.1f);
+    sendUniformData(UNI_3FV, "ambient",ambient[0]);
+
+    sendUniformData(UNI_3FV, "viewPos", myCam.getPos()[0]);
 }
 
 void GLWindow::handleKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -224,6 +243,37 @@ void GLWindow::getPollingUpdate() {
     if(pollUpdate & mouseBtnUpdate)
         myCam.cameraUpdateMouseBtn(pollMouseBtn, pollMouseBtnAction);
 }
+
+void GLWindow::drawShape(ShapeBuilder &srcShape, int drawMethod, GLenum drawType) {
+    switch(drawMethod) {
+        case(0):
+            glDrawElements(drawType, srcShape.numIndices, GL_UNSIGNED_INT, (void*)0);
+        break;
+        case(1):
+            glDrawArrays(drawType, 0, srcShape.numVertices);
+        break;
+    }
+}
+
+template <typename T>
+void GLWindow::sendUniformData(int dataType, const char* dataName, T& data) {
+    GLint uniformLoc = glGetUniformLocation(programID,dataName);
+    switch(dataType) {
+        case(UNI_1I):
+            glUniform1i(uniformLoc, data);
+        break;
+        case(UNI_3FV):
+            glUniform3fv(uniformLoc, 1, (GLfloat*)(&data));
+        break;
+        case(UNI_M4FV):
+            glUniformMatrix4fv(uniformLoc, 1, GL_FALSE, (GLfloat*)(&data));
+        break;
+    }
+}
+
+template void GLWindow::sendUniformData<int>(int dataType, const char* dataName, int&);
+template void GLWindow::sendUniformData<GLfloat>(int dataType, const char* dataName, GLfloat&);
+
 
 void GLWindow::cleanUP() {
     //TODO: implement cleanup
